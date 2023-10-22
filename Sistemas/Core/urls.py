@@ -4,7 +4,9 @@ from Calculo_auto import views as ca_views
 from Calculo_Cotizaciones import views as cc_views
 
 urlpatterns = [
+    path('',include('Calculo_Cotizaciones.urls')),
+    path('',include('Calculo_auto.urls')),
     path('admin/', admin.site.urls),
-    path('main_calculo_cotizaciones/', cc_views.home2, name='main_calculo_cotizaciones'),
-    path('main_calculo_auto/', ca_views.home1, name='main_calculo_auto'),
+    path('', cc_views.inicio, name='inicio'),
+    path('accounts/', include('django.contrib.auth.urls')),
 ]
