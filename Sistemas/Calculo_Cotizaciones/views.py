@@ -8,10 +8,9 @@ def inicio (request):
 
 class CustomLoginView(LoginView):
     authentication_form = CustomAuthenticationForm
+    
 @login_required
-def home2 (request):
-    return render(request, 'home2.html')
-
-
+def home (request):
+    return render(request, 'home.html')
 
 
