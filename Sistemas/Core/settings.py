@@ -27,7 +27,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Calculo_Cotizaciones',
-    'Calculo_auto',
     'Core',
 ]
 
@@ -123,4 +122,4 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = 'home2'
+LOGIN_REDIRECT_URL = 'home'
