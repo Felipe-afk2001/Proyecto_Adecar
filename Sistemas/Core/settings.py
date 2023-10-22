@@ -113,8 +113,11 @@ STATIC_URL = 'static/'
 #CONFIGURACIÓN DE CARPETA DONDE ESTARÁN LOS ARCHIVOS ESTÁTICOS
 STATICFILES_DIRS = [
     BASE_DIR / "static",
-    'var/www/static', #Este sirve para después cuando migremos a nuestro sistema
+    # 'var/www/static', #Este sirve para después cuando migremos a nuestro sistema
 ]
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+# python manage.py collectstatic
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
