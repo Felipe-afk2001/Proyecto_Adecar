@@ -9,7 +9,7 @@
 </head>
 <body>
     {% include 'layouts/partials/navbar.html' %}
-    <main></main>
+    <main>{% block main %}{% endblock %}</main>
     <footer></footer>
 </body>
 <script src="{% static 'js/bootstrap.min.js' %}"></script>
