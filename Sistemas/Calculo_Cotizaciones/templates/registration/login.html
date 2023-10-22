@@ -1,0 +1,22 @@
+{% extends 'layouts/base_cc.html' %}
+{% block main %}
+
+<form method="post">
+    <br>
+    <br>
+    {% csrf_token %}
+    {{ form.username.label_tag }}
+    <br>
+    {{ form.username }}
+    <br>
+    <br>
+    {{ form.password.label_tag }} 
+    <br>
+    {{ form.password }}
+    <br>
+    <br>
+    <br>
+    <button type="submit">Iniciar sesión</button>
+</form>
+
+{% endblock %}
