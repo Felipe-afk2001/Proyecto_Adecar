@@ -2,7 +2,6 @@
     display: block;
     margin: 20px auto; /* Aumenta el margen vertical para separar los botones */
     max-width: 150px; /* Establece el ancho máximo que desees */
-    background-color: #9197ae; /* Cambia el color de fondo a #9197ae */
 }
 
 body {
