@@ -1,21 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es-cl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css\bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css\adecar.css' %}">
+    <title>{% block title %}{% endblock %}</title>
+</head>
 <body style="text-align: center;">
-    {% load static %}
-    <!DOCTYPE html>
-    <html lang="es-cl">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="{% static 'css\bootstrap.min.css' %}">
-        <link rel="stylesheet" href="{% static 'css\adecar.css' %}">
-        <title>{% block title %}{% endblock %}</title>
-    </head>
-    {% include 'layouts/partials/navbar.html' %}
-    <main>{% block main %}{% endblock %}</main>
-    <!-- Encabezado con logotipo centrado -->
     <header class="text-center">
         <!-- Utiliza la etiqueta img para mostrar el logotipo desde tu carpeta 'static' -->
         <img src="{% static 'img\logo.png' %}" alt="Logo Adecar">
     </header>
+    {% include 'layouts/partials/navbar.html' %}
+    <main>{% block main %}{% endblock %}</main>
+    <!-- Encabezado con logotipo centrado -->
     <!-- Contenido principal -->
     <div>
         <!-- Aquí puedes agregar el contenido principal de tu página -->
@@ -28,3 +28,4 @@
     <script src="{% static 'js\bootstrap.min.js' %}"></script>
     </html>
 </body>
+</html>
