@@ -1,12 +1,10 @@
 from django.contrib import admin
 from django.urls import path, include
-from . import views
-from Calculo_auto import urls
-from Calculo_Cotizaciones import urls
+from Calculo_auto import views as ca_views
+from Calculo_Cotizaciones import views as cc_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('main_menu/', views.main_menu, name='main_menu'),
-    path('', include('Calculo_Cotizaciones.urls')),
-    path('', include('Calculo_auto.urls')),
+    path('main_calculo_cotizaciones/', cc_views.home2, name='main_calculo_cotizaciones'),
+    path('main_calculo_auto/', ca_views.home1, name='main_calculo_auto'),
 ]
