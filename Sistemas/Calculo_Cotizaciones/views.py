@@ -4,7 +4,7 @@ from django.contrib.auth.views import LoginView
 from .forms import CustomAuthenticationForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth import login, logout
 
 def login_view(request):
@@ -19,18 +19,6 @@ def login_view(request):
 
 def inicio (request):
     return render(request, 'inicio.html')
-
-def registrar(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'La cuenta ha sido creada para {username}')
-            return redirect('login')  # Puedes cambiar 'login' por la URL de inicio de sesión de tu aplicación
-    else:
-        form = UserCreationForm()
-    return render(request, 'registrar.html', {'form': form})
 
 @login_required
 def home (request):

@@ -1,22 +1,23 @@
 {% extends 'layouts/base_cc.html' %}
 {% block main %}
-
-<form method="post">
-    <br>
-    <br>
-    {% csrf_token %}
-    {{ form.username.label_tag }}
-    <br>
-    {{ form.username }}
-    <br>
-    <br>
-    {{ form.password.label_tag }} 
-    <br>
-    {{ form.password }}
-    <br>
-    <br>
-    <br>
-    <button type="submit">Iniciar sesión</button>
-</form>
-<a href="{% url 'registrar' %}">Registrarse</a>
+<div class="inicio_sesion">
+    <form method="post">
+        <br>
+        <br>
+        {% csrf_token %}
+        {{ form.username.label_tag }}
+        <br>
+        {{ form.username }}
+        <br>
+        <br>
+        {{ form.password.label_tag }} 
+        <br>
+        {{ form.password }}
+        <br>
+        <br>
+        <br>
+        <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+    </form>
+    <a type="button" class="btn btn-primary" href="{% url 'registrar' %}" style="margin-top: 1%;">Registrarse</a>
+</div>
 {% endblock %}
