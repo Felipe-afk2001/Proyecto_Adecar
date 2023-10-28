@@ -36,3 +36,6 @@ def registrar(request):
         form = UserCreationForm()
     return render(request, 'registrar.html', {'form': form})
 
+def cotizacion_manual (request):
+    return render(request, 'cotizacion_manual.html')
+
