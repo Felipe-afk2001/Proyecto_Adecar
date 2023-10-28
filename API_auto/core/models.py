@@ -1,4 +1,8 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
 
 class solicitud_cotizacion(models.Model):
     id_cotizacion = models.IntegerField(primary_key=True)
@@ -12,4 +16,9 @@ class solicitud_cotizacion(models.Model):
 
     def __str__(self):
         return self.id_cotizacion
+
+@receiver(post_save, sender= User)
+def crear_auth_token(sender, instance= None, created = False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
 
