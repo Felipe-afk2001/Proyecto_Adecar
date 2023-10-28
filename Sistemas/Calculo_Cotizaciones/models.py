@@ -55,7 +55,7 @@ class Solicitud_Cotizacion(models.Model):
 
 class Detalle_Cotizaciones(models.Model):
     id_detalle_cotizacion = models.CharField(max_length=100, primary_key=True)
-    id_solicitud_cliente = models.ForeignKey(Solicitud_Cotizacion, on_delete=models.CASCADE)
+    id_solicitud = models.ForeignKey(Solicitud_Cotizacion, on_delete=models.CASCADE)
     id_cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     largo = models.DecimalField(max_digits=4, decimal_places=0)
     ancho = models.DecimalField(max_digits=4, decimal_places=0)
