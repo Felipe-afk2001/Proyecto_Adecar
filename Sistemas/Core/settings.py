@@ -45,7 +45,9 @@ ROOT_URLCONF = 'Core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'], #DIRECTORIO QUE TIENE LOS TEMPLATES QUE VAMOS A USAR
+        'DIRS': [
+            BASE_DIR / "Calculo_Cotizaciones" / "templates",  # Ruta plantillas
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -68,7 +70,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.oracle',
         'NAME': 'XE',  # Nombre del servicio Oracle Express
-        'USER': 'SYSTEM',
+        'USER': 'USER_DJANGO_ADECAR',
         'PASSWORD': 'Adecar.321',
         'HOST': 'localhost',  # O la dirección donde está alojada la base de datos
         'PORT': '1521',  # Puerto por defecto de Oracle
@@ -115,7 +117,7 @@ STATIC_URL = 'static/'
 
 #CONFIGURACIÓN DE CARPETA DONDE ESTARÁN LOS ARCHIVOS ESTÁTICOS
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    BASE_DIR / "Calculo_Cotizaciones" / "static",
     # 'var/www/static', #Este sirve para después cuando migremos a nuestro sistema
 ]
 
