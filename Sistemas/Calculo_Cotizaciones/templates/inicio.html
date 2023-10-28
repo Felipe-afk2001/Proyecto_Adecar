@@ -1,8 +1,12 @@
-{% extends 'layouts/base_cc.html' %}
+{% extends 'layouts/base.html' %}
+{% load static %}
 {% block main %}
-<ul>
-    <li>
-        <a href="{% url 'home' %}">inicio sesion</a>
-    </li>
-</ul>
-{% endblock %}
+<div class="text-center"> 
+    <img src="{% static 'img/logo.png' %}" alt="Logo Adecar" width="15%" class="mb-3"> <!-- Agregamos la clase mb-3 para un margen inferior -->
+    <ul>
+        <li>
+            <a href="{% url 'home' %}" class="btn btn-primary">Inicio de sesión</a>
+        </li>
+    </ul>
+</div>
+{% endblock %}
