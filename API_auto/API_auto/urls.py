@@ -18,11 +18,13 @@ Including another URLconf
 from django.urls import path, include
 from django.contrib import admin
 from core.api.router import router_solicitud
+from core.api.views import calcular_vista
 
 
 
 urlpatterns = [
     path('admin', admin.site.urls),
-    path('api/',include(router_solicitud.urls))
+    path('api/',include(router_solicitud.urls)),
+    path('calcular/', calcular_vista, name='calcular'),
 
 ]
