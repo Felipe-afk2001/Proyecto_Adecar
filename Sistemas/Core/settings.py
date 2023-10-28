@@ -66,8 +66,12 @@ WSGI_APPLICATION = 'Core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.oracle',
+        'NAME': 'XE',  # Nombre del servicio Oracle Express
+        'USER': 'SYSTEM',
+        'PASSWORD': 'Adecar.321',
+        'HOST': 'localhost',  # O la dirección donde está alojada la base de datos
+        'PORT': '1521',  # Puerto por defecto de Oracle
     }
 }
 
