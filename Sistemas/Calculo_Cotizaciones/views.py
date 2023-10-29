@@ -1,11 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import LoginView
-from .forms import CustomAuthenticationForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.contrib.auth import login, logout
+from django.contrib.auth import login
 
 def login_view(request):
     if request.method == 'POST':
@@ -16,9 +14,6 @@ def login_view(request):
     else:
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
-
-def inicio (request):
-    return render(request, 'inicio.html')
 
 @login_required
 def home (request):
