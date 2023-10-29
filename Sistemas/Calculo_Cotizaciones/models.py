@@ -1,14 +1,15 @@
 from django.db import models
 
-class Usuario(models.Model):
-    id_usuario = models.CharField(max_length=100, primary_key=True)
-    nombre_usuario = models.CharField(max_length=20)
-    correo = models.CharField(max_length=255)
-    nombre_persona = models.CharField(max_length=40)
-    contrasenia = models.CharField(max_length=16)
-    token = models.CharField(max_length=10) # Token de autenticación debe llevar max_length.
-    class Meta:
-        db_table = 'Usuario'
+# class Usuario(models.Model):
+#     id_usuario = models.CharField(max_length=100, primary_key=True)
+#     nombre_usuario = models.CharField(max_length=20)
+#     correo = models.CharField(max_length=255)
+#     nombre_persona = models.CharField(max_length=40)
+#     contrasenia = models.CharField(max_length=16)
+#     token = models.CharField(max_length=10) # Token de autenticación debe llevar max_length.
+#     class Meta:
+#         db_table = 'Usuario'
+# Este debe ser el usuario admin de django.
 
 class Tipo_Plancha(models.Model):
     id_tipo_plancha = models.CharField(max_length=100, primary_key=True)
