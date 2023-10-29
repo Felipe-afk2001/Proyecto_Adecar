@@ -22,7 +22,7 @@ from core.api.views import calcular_vista
 
 
 urlpatterns = [
-    path('admin', admin.site.urls),
+    path('admin/', admin.site.urls),
     path('calcular/', calcular_vista, name='calcular'),
 
 ]
