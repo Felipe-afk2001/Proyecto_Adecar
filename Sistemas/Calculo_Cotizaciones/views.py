@@ -5,6 +5,8 @@ from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth import login
 
+from django.http import HttpResponse
+
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, request.POST)
@@ -34,3 +36,21 @@ def registrar(request):
 def cotizacion_manual (request):
     return render(request, 'cotizacion_manual.html')
 
+"""
+VISTAS DE COTIZACIÓN MANUAL
+"""
+def procesar_datos(request):
+    if request.method == 'POST':
+        largo = float(request.POST.get('largo'))
+        ancho = float(request.POST.get('ancho'))
+        alto = float(request.POST.get('alto'))
+        tipo_carton = request.POST.get('tipo_carton')
+
+        calculo = largo + ancho + alto 
+
+        # nuevo_carton = DimensionesCarton(largo=largo, ancho=ancho, alto=alto, tipo_carton=tipo_carton)
+        # nuevo_carton.save()
+
+        return HttpResponse(f"{calculo}, {tipo_carton}Datos listos para procesarlos en la siguiente fase (Falta validar contra la tabla de planchas).")
+    else:
+        return HttpResponse("Completa el formulario.")

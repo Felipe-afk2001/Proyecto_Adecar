@@ -116,27 +116,54 @@
 
 
 {% block section %}
+<script>
+    function validarFormulario() {
+        var largo = document.getElementById('largo').value;
+        var ancho = document.getElementById('ancho').value;
+        var alto = document.getElementById('alto').value;
+        var tipoCarton = document.querySelector('select[name="tipo_carton"]').value;
+
+        if (largo === '' || ancho === '' || alto === '' || tipoCarton === '') {
+            alert('Por favor, complete todos los campos.');
+            return false;
+        }
+        if (largo.length > 10 || ancho.length > 10 || alto.length > 10) {
+            alert('Los campos numéricos no deben exceder los 10 caracteres.');
+            return false;
+        }
+        return true;
+    }
+</script>
+
 <div class="container position-relative">
     <div class="row d-flex justify-content-center">
         <div class="col-md-8 col-lg-6 col-xl-5 col-xxl-4">
             <div class="card mb-5" style="margin-right: -260px;margin-left: -261px;">
                 <div class="card-body p-sm-5"><img style="padding-left: 0px;margin-left: 298px;" src="{% static 'img/cropped-adecarlogoweb.png' %}" width="198" height="63">
                     <h2 class="text-center mb-4" style="margin-top: 30px;padding-top: 0px;">Cotización Manual</h2>
-                    <form method="post">
-                        <div class="mb-3"><input class="form-control" type="text" id="name-2" name="largo" placeholder="Largo (mm)"></div>
-                        <div class="mb-3"><input class="form-control" type="email" id="email-2" name="ancho" placeholder="Ancho (mm)"></div><input class="form-control" type="email" id="email-1" name="alto" placeholder="Alto (mm)">
+                    <form method="post" action="{% url 'procesar_datos' %}" onsubmit="return validarFormulario()">
+                        {% csrf_token %}
+                        <div class="mb-3"><input class="form-control" type="number" id="largo" name="largo" placeholder="Largo (mm)" min="0" step="any" required maxlength="10"></div>
+                        <div class="mb-3"><input class="form-control" type="number" id="ancho" name="ancho" placeholder="Ancho (mm)" min="0" step="any" required maxlength="10"></div>
+                        <div class="mb-3"><input class="form-control" type="number" id="alto" name="alto" placeholder="Alto (mm)" min="0" step="any" required maxlength="10"></div>
+                        <div class="mb-3">
+                            <select class="form-select" name="tipo_carton" required>
+                                <option value="">Seleccionar tipo de cartón</option>
+                                <option value="12-c">12 - C</option>
+                                <option value="20-c">20 - C</option>
+                            </select>
+                        </div>
                         <div class="mb-3"></div>
                         <div></div>
+                        <input type="submit" class="btn btn-primary" value="Enviar">
                     </form>
-                    <div class="dropdown" style="margin-left: 18px;"><button class="btn btn-primary dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button" style="margin-left: 320px;">Tipo de cartón&nbsp;</button>
-                        <div class="dropdown-menu" style="margin-right: 250px;padding-left: 0px;margin-left: 250px;"><a class="dropdown-item" href="#">12 - C</a><a class="dropdown-item" href="#">20 - C</a></div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
+
 
 
 {% block main %}
