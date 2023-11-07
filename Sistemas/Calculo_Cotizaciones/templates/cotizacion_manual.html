@@ -118,21 +118,26 @@
 {% block section %}
 <script>
     function validarFormulario() {
-        var largo = document.getElementById('largo').value;
-        var ancho = document.getElementById('ancho').value;
-        var alto = document.getElementById('alto').value;
+        var largo = parseFloat(document.getElementById('largo').value);
+        var ancho = parseFloat(document.getElementById('ancho').value);
+        var alto = parseFloat(document.getElementById('alto').value);
         var tipoCarton = document.querySelector('select[name="tipo_carton"]').value;
 
-        if (largo === '' || ancho === '' || alto === '' || tipoCarton === '') {
+        if (largo <= 0 || ancho <= 0 || alto <= 0) {
+            alert('Las medidas deben ser mayores que 0.');
+            return false;
+        }
+        if (largo === 0 || ancho === 0 || alto === 0 || tipoCarton === '') {
             alert('Por favor, complete todos los campos.');
             return false;
         }
-        if (largo.length > 10 || ancho.length > 10 || alto.length > 10) {
+        if (largo.toString().length > 10 || ancho.toString().length > 10 || alto.toString().length > 10) {
             alert('Los campos numéricos no deben exceder los 10 caracteres.');
             return false;
         }
         return true;
     }
+</script>
 </script>
 
 <div class="container position-relative">
