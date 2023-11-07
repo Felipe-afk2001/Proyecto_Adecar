@@ -19,20 +19,31 @@ class solicitud_cotizacion(models.Model):
         return self.id_cotizacion
     
 class detalle_cotizacion(models.Model):
-    id_detalle_cotizacion = models.CharField(max_length=100, primary_key=True)
-    id_solicitud = models.CharField(unique=True)
-    id_cliente = models.CharField(unique=True)
-    largo = models.DecimalField(max_digits=4, decimal_places=0)
-    ancho = models.DecimalField(max_digits=4, decimal_places=0)
-    alto = models.DecimalField(max_digits=4, decimal_places=0)
+    id_detalle_cotizacion = models.IntegerField(primary_key=True, unique=True)
+    id_solicitud_cotizacion = models.IntegerField(unique=True)
+    id_cliente = models.IntegerField(unique=True)
+    largo_caja = models.IntegerField()
+    ancho_caja = models.IntegerField()
+    alto_caja = models.IntegerField()
+    area_caja = models.IntegerField()
+    area_plancha = models.IntegerField()
+    cant_materia_prima = models.IntegerField()
+    coste_materia = models.IntegerField()
+    coste_creacion = models.IntegerField()
+    precio_caja = models.IntegerField()
+    cantidad_caja = models.IntegerField()
+    precio_total = models.IntegerField()
     comentario = models.CharField(max_length=400)
-    cod_estado = models.DecimalField(max_digits=3, decimal_places=0)
-    descripcion_estado = models.CharField(max_length=50)
-    precio_cotizacion = models.DecimalField(max_digits=9, decimal_places=0)
-    excedente = models.DecimalField(max_digits=4, decimal_places=0)
-    id_tipo_plancha = models.CharField(unique=True)
-    cantidad_plancha = models.DecimalField(max_digits=4, decimal_places=0)
-    cantidad_caja = models.DecimalField(max_digits=4, decimal_places=0)
+    cod_estado = models.CharField(max_length=5)
+    porcentaje_utilidad = models.DecimalField(max_digits=4, decimal_places=0)
+    excedente = models.IntegerField()
+    id_tipo_plancha = models.IntegerField()
+    cantidad_plancha = models.IntegerField()
+    precio_plancha = models.IntegerField()
+    
+
+    def __str__(self):
+        return self.id_detalle_cotizacion
     
 class UsuarioManager(BaseUserManager):
     def create_user(self, email, username, nombre, apellidos, password=None):
