@@ -135,22 +135,31 @@
             alert('Los campos numéricos no deben exceder los 10 caracteres.');
             return false;
         }
-        return true;
+
+        // Confirmación de medidas y tipo de cartón antes de enviar el formulario
+        var confirmacion = confirm(`¿Confirma que las medidas ingresadas son las deseadas?\nLargo: ${largo} mm\nAncho: ${ancho} mm\nAlto: ${alto} mm\nTipo de Cartón: ${tipoCarton}`);
+        return confirmacion;
     }
 </script>
-</script>
 
-<div class="container position-relative">
-    <div class="row d-flex justify-content-center">
-        <div class="col-md-8 col-lg-6 col-xl-5 col-xxl-4">
-            <div class="card mb-5" style="margin-right: -260px;margin-left: -261px;">
-                <div class="card-body p-sm-5"><img style="padding-left: 0px;margin-left: 298px;" src="{% static 'img/cropped-adecarlogoweb.png' %}" width="198" height="63">
-                    <h2 class="text-center mb-4" style="margin-top: 30px;padding-top: 0px;">Cotización Manual</h2>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-sm-12 col-md-10 col-lg-8">
+            <div class="card mb-5">
+                <div class="card-body p-4">
+                    <img src="{% static 'img/cropped-adecarlogoweb.png' %}" class="img-fluid d-block mx-auto mb-3" alt="Logo" style="max-width: 200px;">
+                    <h2 class="text-center mb-4">Cotización Manual</h2>
                     <form method="post" action="{% url 'procesar_datos' %}" onsubmit="return validarFormulario()">
                         {% csrf_token %}
-                        <div class="mb-3"><input class="form-control" type="number" id="largo" name="largo" placeholder="Largo (mm)" min="0" step="any" required maxlength="10"></div>
-                        <div class="mb-3"><input class="form-control" type="number" id="ancho" name="ancho" placeholder="Ancho (mm)" min="0" step="any" required maxlength="10"></div>
-                        <div class="mb-3"><input class="form-control" type="number" id="alto" name="alto" placeholder="Alto (mm)" min="0" step="any" required maxlength="10"></div>
+                        <div class="mb-3">
+                            <input class="form-control" type="number" id="largo" name="largo" placeholder="Largo (mm)" min="0" step="any" required maxlength="10">
+                        </div>
+                        <div class="mb-3">
+                            <input class="form-control" type="number" id="ancho" name="ancho" placeholder="Ancho (mm)" min="0" step="any" required maxlength="10">
+                        </div>
+                        <div class="mb-3">
+                            <input class="form-control" type="number" id="alto" name="alto" placeholder="Alto (mm)" min="0" step="any" required maxlength="10">
+                        </div>
                         <div class="mb-3">
                             <select class="form-select" name="tipo_carton" required>
                                 <option value="">Seleccionar tipo de cartón</option>
@@ -158,9 +167,9 @@
                                 <option value="20-c">20 - C</option>
                             </select>
                         </div>
-                        <div class="mb-3"></div>
-                        <div></div>
-                        <input type="submit" class="btn btn-primary" value="Enviar">
+                        <div class="mb-3">
+                            <input type="submit" class="btn btn-primary w-100" value="Enviar">
+                        </div>
                     </form>
                 </div>
             </div>

@@ -33,12 +33,15 @@ def registrar(request):
         form = UserCreationForm()
     return render(request, 'registrar.html', {'form': form})
 
+"""
+-----------------------------------------------------------------------------
+VISTAS DE COTIZACIÓN MANUAL
+-----------------------------------------------------------------------------
+"""
+
 def cotizacion_manual (request):
     return render(request, 'cotizacion_manual.html')
 
-"""
-VISTAS DE COTIZACIÓN MANUAL
-"""
 def procesar_datos(request):
     if request.method == 'POST':
         largo = float(request.POST.get('largo'))
