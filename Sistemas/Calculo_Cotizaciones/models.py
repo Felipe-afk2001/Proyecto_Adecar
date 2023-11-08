@@ -72,3 +72,12 @@ class Detalle_Cotizaciones(models.Model):
     class Meta:
         db_table = 'Detalle_Cotizaciones'
 
+class Parametro(models.Model):
+    id_parametro = models.DecimalField(max_digits=3, decimal_places=0, primary_key=True)
+    largo_maximo = models.DecimalField(max_digits=5, decimal_places=0)
+    ancho_maximo = models.DecimalField(max_digits=5, decimal_places=0)
+    excedente_horizontal = models.DecimalField(max_digits=5,decimal_places=0)
+    excedente_vertical = models.DecimalField(max_digits=5,decimal_places=0)
+    class Meta:
+        db_table = 'Parametro'
+
