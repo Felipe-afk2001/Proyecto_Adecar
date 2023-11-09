@@ -3,6 +3,7 @@ body {
     color: white; /* Establece el color de texto en blanco */
 }
 
+
 .navbar {
     background-color: #9197ae;
 }
@@ -15,3 +16,60 @@ body {
     position: relative;
 
 }
+
+.mantencion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mantencion-content {
+display: flex;
+flex-direction: column;
+background-color: #f0f0f0;
+padding: 20px;
+border-radius: 10px;
+}
+
+.mantencion-medidas {
+background-color: #ffffff;
+padding: 10px;
+margin-bottom: 20px;
+border-radius: 5px;
+}
+
+.mantencion-info {
+display: flex;
+justify-content: space-between;
+margin-bottom: 20px;
+}
+
+.info-grupo {
+display: flex;
+justify-content: space-between;
+background-color: #ffffff;
+padding: 10px;
+border-radius: 5px;
+}
+
+.mantencion-acciones {
+display: flex;
+justify-content: space-between;
+}
+
+.btn-accion {
+padding: 10px 20px;
+border: none;
+border-radius: 5px;
+cursor: pointer;
+}
+
+.volver {
+background-color: #cccccc;
+}
+
+.continuar {
+background-color: #007bff;
+color: #ffffff;
+}
+  

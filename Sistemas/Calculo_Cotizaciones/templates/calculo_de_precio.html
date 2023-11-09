@@ -1,0 +1,129 @@
+{% extends 'layouts/base_nav_lateral.html' %}
+{% load static %}
+
+
+{% block nav_lateral %}
+<nav class="navbar navbar-dark align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0">
+    <div class="container-fluid d-flex flex-column p-0"><a class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0" href="#">
+            <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-box-open" style="color: var(--bs-danger);"></i></div>
+            <div class="sidebar-brand-text mx-3"><span>Adecar Ltda.</span></div>
+        </a>
+        <hr class="sidebar-divider my-0">
+        <ul class="navbar-nav text-light" id="accordionSidebar">
+            <li class="nav-item"><a class="nav-link active" href="#"><i class="fas fa-file-invoice-dollar"></i><span>Cotización</span></a></li>
+            <li class="nav-item"></li>
+            <li class="nav-item"></li>
+            <li class="nav-item"></li>
+            <li class="nav-item"><a class="nav-link" href="register.html"><i class="fas fa-th-list"></i><span>Cotizaciones Pendientes</span></a><a class="nav-link" href="profile.html"><i class="fas fa-history"></i><span>Historial de Cotizaciones</span></a><a class="nav-link" href="table.html"><i class="fas fa-cog"></i><span>Mantención de Planchas</span></a><a class="nav-link" href="login.html"><i class="fas fa-cog"></i><span>Mantención de Parámetros</span></a></li>
+        </ul>
+        <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button></div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block section %}
+
+<p style="color: black;"><strong>Largo : {{largo}} mm, Ancho : {{ancho}} mm, Alto : {{alto}} mm, Tipo Cartón : {{tipo_carton}}</strong></p>
+<div id="wrapper">
+    <div class="d-flex flex-column" id="content-wrapper">
+        <div id="content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Medidas:</th>
+                                        <th>n</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Precio:</td>
+                                        <td>n</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Hoja Madre:</td>
+                                        <td>n</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Excedente vertical:</td>
+                                        <td>n</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Excedente horizontal:</td>
+                                        <td>n</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Cajas por hoja:</td>
+                                        <td>n</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Costo excedente vertical:</td>
+                                        <td>n</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Costo excedente horizontal:</td>
+                                        <td>n</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Precio costo por unidad:</td>
+                                        <td>n</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Cell 1</td>
+                                        <td>n</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <form action="#" method="post">
+                            <div class="row">
+                                <div class="col">
+                                    <label for="porcentajeVenta" style="margin-left: 36px;">Porcentaje Venta</label>
+                                    <select name="porcentajeVenta" id="porcentajeVenta" class="form-select" style="margin-left: 36px;">
+                                        <option value="">Selecciona un porcentaje</option>
+                                        {% for porcentaje in porcentajes %}
+                                            <option value="{{ porcentaje }}">{{ porcentaje }}%</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col" style="margin-top: 22px;">
+                                    <p style="margin-left: 35px;margin-right: 36px;">$</p>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="bg-white sticky-footer">
+            <div class="container my-auto">
+                <div class="text-center my-auto copyright"><span>Copyright © Adecar - Cálculo y Cotizaciones 2023</span></div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+{% endblock %}
+
+
+
+{% block main %}
+
+{% endblock %}
+
+
+{% block footer %}
+<div class="container my-auto">
+    <div class="text-center my-auto copyright"><span>Copyright © Adecar - Cálculo y Cotizaciones 2023</span></div>
+</div>
+{% endblock %}
+
+{% block js %}
+{% endblock %}
