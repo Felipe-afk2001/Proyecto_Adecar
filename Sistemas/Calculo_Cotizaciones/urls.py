@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import home, registrar, login_view, cotizacion_manual, procesar_datos, calculo_de_precio, porcentajes_venta
+from .views import home, registrar, login_view, cotizacion_manual, procesar_datos, calculo_de_precio
 from django.contrib.auth.views import LogoutView
 
 
