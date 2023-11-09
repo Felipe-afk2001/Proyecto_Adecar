@@ -11,5 +11,4 @@ urlpatterns = [
     path('cotizacion_manual/', cotizacion_manual, name='cotizacion_manual'),
     path('procesar_datos/', procesar_datos, name='procesar_datos'),
     path('calculo_de_precio/', calculo_de_precio, name='calculo_de_precio'),
-    path('porcentajes_venta/',porcentajes_venta, name='porcentajes_venta'),
 ]

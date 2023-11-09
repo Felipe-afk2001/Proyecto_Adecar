@@ -5,8 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth import login
 from Calculo_Cotizaciones.models import Parametro #Para hacer las validaciones de los parámetros
-
-from django.http import HttpResponse
+from django.http import JsonResponse, HttpResponse
 
 def login_view(request):
     if request.method == 'POST':
@@ -70,6 +69,11 @@ def procesar_datos(request):
         ancho1=an1+an2+an3
 
         """
+        Porcentajes de venta a cargar en próxima plantilla
+        """
+        porcentajes = list(range(5, 105, 5)) # Asegúrate de que el 105 está fuera del rango para incluir el 100
+
+        """
         Validación de medida contra tabla de parámetros
         (Podríamos agregar confirmación ya que se pueden ingresar más parámetros)
         """
@@ -79,11 +83,7 @@ def procesar_datos(request):
     if mensaje_error:
         return render(request, 'cotizacion_manual.html', {'mensaje_error': mensaje_error})
     else:
-        return render(request, 'calculo_de_precio.html',{'largo':largo, 'ancho':ancho, 'alto':alto, 'tipo_carton':tipo_carton})
+        return render(request, 'calculo_de_precio.html',{'largo':largo, 'ancho':ancho, 'alto':alto, 'tipo_carton':tipo_carton, 'porcentajes':porcentajes})
 
 def calculo_de_precio(request):
     return render(request, 'calculo_de_precio.html')
-
-def porcentajes_venta(request):
-    porcentajes = [i for i in range(5, 101, 5)]
-    return render(request, 'calculo_de_precio.html', {'porcentajes': porcentajes})

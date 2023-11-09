@@ -21,12 +21,8 @@
 </nav>
 {% endblock %}
 
-
-{% block nav_light %}
-
-{% endblock %}
-
 {% block section %}
+
 <p style="color: black;"><strong>Largo : {{largo}} mm, Ancho : {{ancho}} mm, Alto : {{alto}} mm, Tipo Cartón : {{tipo_carton}}</strong></p>
 <div id="wrapper">
     <div class="d-flex flex-column" id="content-wrapper">
@@ -113,6 +109,7 @@
         </footer>
     </div>
 </div>
+
 {% endblock %}
 
 
@@ -126,4 +123,7 @@
 <div class="container my-auto">
     <div class="text-center my-auto copyright"><span>Copyright © Adecar - Cálculo y Cotizaciones 2023</span></div>
 </div>
+{% endblock %}
+
+{% block js %}
 {% endblock %}
