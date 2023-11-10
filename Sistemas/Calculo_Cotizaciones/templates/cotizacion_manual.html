@@ -59,7 +59,7 @@
             <div class="card mb-5">
                 <div class="card-body p-4">
                     <img src="{% static 'img/cropped-adecarlogoweb.png' %}" class="img-fluid d-block mx-auto mb-3" alt="Logo" style="max-width: 200px;">
-                    <h2 class="text-center mb-4">Cotización Manual</h2>
+                    <h2 class="text-center mb-4" style="color: black;">Cotización Manual</h2>
                     <form method="post" action="{% url 'procesar_datos' %}" onsubmit="return validarFormulario()">
                         {% csrf_token %}
                         <div class="mb-3">

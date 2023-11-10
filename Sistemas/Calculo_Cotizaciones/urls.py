@@ -1,9 +1,5 @@
 from django.urls import path, include
-<<<<<<< HEAD
-from .views import home, registrar, login_view, cotizacion_manual
-=======
 from .views import home, registrar, login_view, cotizacion_manual, procesar_datos, calculo_de_precio
->>>>>>> main
 from django.contrib.auth.views import LogoutView
 
 

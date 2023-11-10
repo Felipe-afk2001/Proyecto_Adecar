@@ -1,13 +1,32 @@
-{% extends 'layouts/base.html' %}
-{% block main %}
-<div class="menu-buttons">
-    <button type="button" class="btn btn-lg btn-primary" disabled>Cotizaciones</button>
-    <button type="button" class="btn btn-lg btn-primary" disabled>Historial de Cotizaciones</button>
-    <button type="button" class="btn btn-lg btn-primary" disabled>Mantención</button>
-    <button type="button" class="btn btn-lg btn-primary" disabled>Cotizaciones Pendientes</button>
-</div>
+{% extends 'layouts/base_nav_lateral.html' %}
+{% load static %}
+{% block nav_lateral %}
+<nav class="navbar navbar-dark align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0">
+    <div class="container-fluid d-flex flex-column p-0"><a class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0" href="#">
+            <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-box-open" style="color: var(--bs-danger);"></i></div>
+            <div class="sidebar-brand-text mx-3"><span>Adecar Ltda.</span></div>
+        </a>
+        <hr class="sidebar-divider my-0">
+        <ul class="navbar-nav text-light" id="accordionSidebar">
+            <li class="nav-item"><a class="nav-link" href="{% url 'cotizacion_manual' %}"><i class="fas fa-file-invoice-dollar"></i><span>Cotización</span></a></li>
+            <li class="nav-item"></li>
+            <li class="nav-item"></li>
+            <li class="nav-item"></li>
+            <li class="nav-item"><a class="nav-link" href="register.html"><i class="fas fa-th-list"></i><span>Cotizaciones Pendientes</span></a><a class="nav-link" href="profile.html"><i class="fas fa-history"></i><span>Historial de Cotizaciones</span></a><a class="nav-link" href="table.html"><i class="fas fa-cog"></i><span>Mantención de Planchas</span></a><a class="nav-link" href="login.html"><i class="fas fa-cog"></i><span>Mantención de Parámetros</span></a></li>
+        </ul>
+        <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button></div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block section %}
 <br>
 <br>
 <br>
-<a href="{% url 'logout' %}">Cerrar Sesión</a>
-{% endblock %}
+<br>
+<br>
+<br>
+<br>
+<img src="{% static 'img/cropped-adecarlogoweb.png' %}" class="img-fluid d-block mx-auto mb-3" alt="Logo" style="max-width: 300px;">
+
+{% endblock %}
