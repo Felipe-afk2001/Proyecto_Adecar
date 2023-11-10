@@ -59,7 +59,7 @@ def procesar_datos(request):
         la4=ancho+3
         la5=40 #Aleta
         largo1=la1+la2+la3+la4+la5
-        largo2=la1+la2+la5
+        largo2=la1+la2+la5 #media
         """
         Calcula ancho de hoja
         """

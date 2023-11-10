@@ -22,8 +22,6 @@
 {% endblock %}
 
 {% block section %}
-
-<p style="color: black;"><strong>Largo : {{largo}} mm, Ancho : {{ancho}} mm, Alto : {{alto}} mm, Tipo Cartón : {{tipo_carton}}</strong></p>
 <div id="wrapper">
     <div class="d-flex flex-column" id="content-wrapper">
         <div id="content">
@@ -35,7 +33,7 @@
                                 <thead>
                                     <tr>
                                         <th>Medidas:</th>
-                                        <th>n</th>
+                                        <th>{{largo}} x {{ancho}} x {{alto}}, {{tipo_carton}}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -69,10 +67,6 @@
                                     </tr>
                                     <tr>
                                         <td>Precio costo por unidad:</td>
-                                        <td>n</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Cell 1</td>
                                         <td>n</td>
                                     </tr>
                                 </tbody>

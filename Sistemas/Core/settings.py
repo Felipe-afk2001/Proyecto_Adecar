@@ -66,14 +66,21 @@ WSGI_APPLICATION = 'Core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.oracle',
+#         'NAME': 'XE',  # Nombre del servicio Oracle Express
+#         'USER': 'USER_DJANGO_ADECAR',
+#         'PASSWORD': 'Adecar.321',
+#         'HOST': 'localhost',  # O la dirección donde está alojada la base de datos
+#         'PORT': '1521',  # Puerto por defecto de Oracle
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.oracle',
-        'NAME': 'XE',  # Nombre del servicio Oracle Express
-        'USER': 'USER_DJANGO_ADECAR',
-        'PASSWORD': 'Adecar.321',
-        'HOST': 'localhost',  # O la dirección donde está alojada la base de datos
-        'PORT': '1521',  # Puerto por defecto de Oracle
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
