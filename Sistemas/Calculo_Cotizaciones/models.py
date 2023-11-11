@@ -15,7 +15,6 @@ class Tipo_Plancha(models.Model):
     id_tipo_plancha = models.CharField(max_length=100, primary_key=True)
     largo = models.DecimalField(max_digits=4, decimal_places=0)
     ancho = models.DecimalField(max_digits=4, decimal_places=0)
-    alto = models.DecimalField(max_digits=4, decimal_places=0)
     area = models.DecimalField(max_digits=4, decimal_places=0)
     cod_carton = models.CharField(max_length=5)
     descripcion_cod_carton = models.CharField(max_length=50)
