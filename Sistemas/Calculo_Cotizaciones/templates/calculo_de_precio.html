@@ -32,30 +32,42 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>Medidas:</th>
-                                        <th>{{largo}} x {{ancho}} x {{alto}}, {{tipo_carton}}</th>
+                                        <th>Medidas de caja:</th>
+                                        <th>{{largostr}} x {{anchostr}} x {{altostr}} (mm)</th>
+                                    </tr>
+                                    <tr>
+                                        <th>Tipo de cartón:</th>
+                                        <th>{{tipo_carton}}</th>
+                                    </tr>
+                                    <tr>
+                                        <th>Cantidad:</th>
+                                        <th>{{cantidad}} unidades</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
+                                        <td>Plancha a utilizar:</td>
+                                        <td>{{plancha_necesaria.largo}} x {{plancha_necesaria.ancho}} (mm), {{plancha_necesaria.cod_carton}}</td>
+                                    </tr>
+                                    <tr>
                                         <td>Precio:</td>
-                                        <td>n</td>
+                                        <td>${{plancha_necesaria.precio_proveedor}} pesos/hoja</td>
                                     </tr>
                                     <tr>
                                         <td>Hoja Madre:</td>
-                                        <td>n</td>
+                                        <td>{{largo_hm_str}} x {{ancho_hm_str}} (mm)</td>
                                     </tr>
                                     <tr>
                                         <td>Excedente vertical:</td>
-                                        <td>n</td>
+                                        <td>{{excedente_vertical}}</td>
                                     </tr>
                                     <tr>
                                         <td>Excedente horizontal:</td>
-                                        <td>n</td>
+                                        <td>{{excedente_horizontal}}</td>
                                     </tr>
                                     <tr>
                                         <td>Cajas por hoja:</td>
-                                        <td>n</td>
+                                        <td>{{total_cajas_por_plancha}}</td>
                                     </tr>
                                     <tr>
                                         <td>Costo excedente vertical:</td>

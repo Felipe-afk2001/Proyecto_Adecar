@@ -47,6 +47,17 @@
             return false;
         }
 
+        var cantidadCajas = parseInt(document.getElementById('cantidad_cajas').value);
+
+        if (cantidadCajas <= 0) {
+            alert('La cantidad de cajas debe ser mayor que 0.');
+            return false;
+        }
+        if (cantidadCajas.toString().length > 10) {
+            alert('La cantidad de cajas no debe exceder los 10 dígitos.');
+            return false;
+        }
+
         // Confirmación de medidas y tipo de cartón antes de enviar el formulario
         var confirmacion = confirm(`¿Confirma que las medidas ingresadas son las deseadas?\nLargo: ${largo} mm\nAncho: ${ancho} mm\nAlto: ${alto} mm\nTipo de Cartón: ${tipoCarton}`);
         return confirmacion;
@@ -72,10 +83,13 @@
                             <input class="form-control" type="number" id="alto" name="alto" placeholder="Alto (mm)" min="0" step="any" required maxlength="10">
                         </div>
                         <div class="mb-3">
+                            <input class="form-control" type="number" id="cantidad_cajas" name="cantidad_cajas" placeholder="Cantidad de Cajas" min="0" required maxlength="10">
+                        </div>
+                        <div class="mb-3">
                             <select class="form-select" name="tipo_carton" required>
                                 <option value="">Seleccionar tipo de cartón</option>
-                                <option value="12-c">12 - C</option>
-                                <option value="20-c">20 - C</option>
+                                <option value="12C">12 - C</option>
+                                <option value="20C">20 - C</option>
                             </select>
                         </div>
                         <div class="mb-3">
