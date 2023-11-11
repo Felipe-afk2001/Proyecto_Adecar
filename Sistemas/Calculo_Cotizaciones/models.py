@@ -17,7 +17,6 @@ class Tipo_Plancha(models.Model):
     ancho = models.DecimalField(max_digits=4, decimal_places=0)
     area = models.DecimalField(max_digits=4, decimal_places=0)
     cod_carton = models.CharField(max_length=5)
-    descripcion_cod_carton = models.CharField(max_length=50)
     precio_proveedor = models.DecimalField(max_digits=9, decimal_places=0)
     class Meta:
         db_table = 'Tipo_Plancha'
