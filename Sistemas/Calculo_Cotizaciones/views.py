@@ -7,6 +7,7 @@ from django.contrib.auth import login
 from Calculo_Cotizaciones.models import Parametro #Para hacer las validaciones de los parámetros
 from django.http import JsonResponse, HttpResponse
 from Calculo_Cotizaciones.models import Tipo_Plancha
+from django.db import connection
 import math
 
 def login_view(request):
@@ -39,43 +40,40 @@ def registrar(request):
 """
 Selección de plancha a utilizar
 """
-from django.db import connection
 
-def seleccionar_plancha(largo_hm, media_hm, ancho_hm, tipo_carton):
-    # Consulta SQL para plancha que acomode hoja madre más al menos una mitad
-    sql_maximizada = """
-    SELECT * FROM Tipo_Plancha
-    WHERE largo >= %s AND largo >= %s AND ancho >= %s AND cod_carton = %s
-    ORDER BY largo, ancho
-    LIMIT 1
-    """
-    # Consulta SQL para plancha que acomode solo la hoja madre
-    sql_solo_hm = """
-    SELECT * FROM Tipo_Plancha
-    WHERE largo >= %s AND ancho >= %s AND cod_carton = %s
-    ORDER BY largo, ancho
-    LIMIT 1
-    """
+# def seleccionar_plancha(largo_hm, media_hm, ancho_hm, tipo_carton):
+#     # Consulta SQL para plancha que acomode hoja madre más al menos una mitad
+#     sql_maximizada = """
+#     SELECT * FROM Tipo_Plancha
+#     WHERE largo >= %s AND largo >= %s AND ancho >= %s AND cod_carton = %s
+#     ORDER BY largo, ancho
+#     LIMIT 1
+#     """
+#     # Consulta SQL para plancha que acomode solo la hoja madre
+#     sql_solo_hm = """
+#     SELECT * FROM Tipo_Plancha
+#     WHERE largo >= %s AND ancho >= %s AND cod_carton = %s
+#     ORDER BY largo, ancho
+#     LIMIT 1
+#     """
 
-    # Ejecuta la consulta para plancha maximizada
-    with connection.cursor() as cursor:
-        cursor.execute(sql_maximizada, [largo_hm + media_hm, largo_hm, ancho_hm, tipo_carton])
-        result = cursor.fetchone()
+#     # Ejecuta la consulta para plancha maximizada
+#     with connection.cursor() as cursor:
+#         cursor.execute(sql_maximizada, [largo_hm + media_hm, largo_hm, ancho_hm, tipo_carton])
+#         result = cursor.fetchone()
 
-        # Si no se encuentra una plancha maximizada, busca una para solo la hoja madre
-        if not result:
-            cursor.execute(sql_solo_hm, [largo_hm, ancho_hm, tipo_carton])
-            result = cursor.fetchone()
+#         # Si no se encuentra una plancha maximizada, busca una para solo la hoja madre
+#         if not result:
+#             cursor.execute(sql_solo_hm, [largo_hm, ancho_hm, tipo_carton])
+#             result = cursor.fetchone()
 
-    # Si hay un resultado, convertirlo en un diccionario
-    if result:
-        field_names = [col[0] for col in cursor.description]
-        plancha_seleccionada = dict(zip(field_names, result))
-        return plancha_seleccionada
-    else:
-        return None
-
-from django.db import connection
+#     # Si hay un resultado, convertirlo en un diccionario
+#     if result:
+#         field_names = [col[0] for col in cursor.description]
+#         plancha_seleccionada = dict(zip(field_names, result))
+#         return plancha_seleccionada
+#     else:
+#         return None
 
 def calcular_cajas_por_plancha(largo_hm, media_hm, ancho_hm, tipo_carton):
     # Escribe la consulta SQL para encontrar la plancha más adecuada
@@ -146,9 +144,9 @@ def procesar_datos(request):
         """
         Calcula hoja madre
         """
-        largo_hm = int(largo1)
-        ancho_hm = int(ancho1)
-        media_hm = int(largo2)
+        largo_hm = largo1
+        ancho_hm = ancho1
+        media_hm = largo2
 
         # Verifica los tipos de datos
         print("Tipo de largo_hm:", type(largo_hm))
@@ -162,37 +160,56 @@ def procesar_datos(request):
         """
         Seleccionar plancha
         """
-        plancha_necesaria = seleccionar_plancha(largo_hm, media_hm, ancho_hm, tipo_carton)
+        # plancha_necesaria = seleccionar_plancha(largo_hm, media_hm, ancho_hm, tipo_carton)
 
-        plancha_seleccionada, total_cajas = calcular_cajas_por_plancha(largo_hm, media_hm, ancho_hm, tipo_carton)
+        plancha_seleccionada, total_cajas_por_plancha = calcular_cajas_por_plancha(largo_hm, media_hm, ancho_hm, tipo_carton)
+        print(total_cajas_por_plancha)
+
+        
 
         """
         Excedentes de plancha
         """
-        excedente_horizontal =  plancha_necesaria.get('ancho') - ancho_hm
-        excedente_vertical = plancha_necesaria.get('largo') - largo_hm
-
-        """
-        Cálculo de cajas por plancha
-        """
-        largo_plancha = plancha_necesaria.get('largo')
-        ancho_plancha = plancha_necesaria.get('ancho')
+        largo_plancha = plancha_seleccionada.get('largo')
+        ancho_plancha = plancha_seleccionada.get('ancho')
 
         # Calcula cuántas cajas caben en el ancho de la plancha (solo enteras)
         cajas_en_ancho = ancho_plancha // ancho_hm
 
-         # Calcula cuántas cajas caben en el largo de la plancha (enteras y mitades)
+        # Calcula cuántas cajas caben en el largo de la plancha (enteras y mitades)
         cajas_enteras_en_largo = largo_plancha // largo_hm
         espacio_restante = largo_plancha % largo_hm
         cajas_en_largo = cajas_enteras_en_largo
-        if espacio_restante >= largo_hm / 2:
+        if espacio_restante >= media_hm:
             cajas_en_largo += 0.5  # Añade media caja si hay espacio
-        
-        # Calcula el total de cajas que caben en una plancha
-        total_cajas_por_plancha = cajas_en_ancho + cajas_en_largo
 
-        if cajas_en_ancho == 1 and cajas_en_largo == 1:
-            total_cajas_por_plancha = 1
+        # Calcula el espacio total ocupado por las cajas en el largo y ancho
+        espacio_ocupado_en_ancho = cajas_en_ancho * ancho_hm
+        espacio_ocupado_en_largo = (cajas_enteras_en_largo * largo_hm) + (media_hm if espacio_restante >= media_hm else 0)
+        excedente_horizontal = ancho_plancha - espacio_ocupado_en_ancho
+        excedente_vertical = largo_plancha - espacio_ocupado_en_largo
+
+        # """
+        # Cálculo de cajas por plancha
+        # """
+        # largo_plancha = plancha_seleccionada.get('largo')
+        # ancho_plancha = plancha_seleccionada.get('ancho')
+
+        # # Calcula cuántas cajas caben en el ancho de la plancha (solo enteras)
+        # cajas_en_ancho = ancho_plancha // ancho_hm
+
+        #  # Calcula cuántas cajas caben en el largo de la plancha (enteras y mitades)
+        # cajas_enteras_en_largo = largo_plancha // largo_hm
+        # espacio_restante = largo_plancha % largo_hm
+        # cajas_en_largo = cajas_enteras_en_largo
+        # if espacio_restante >= largo_hm / 2:
+        #     cajas_en_largo += 0.5  # Añade media caja si hay espacio
+        
+        # # Calcula el total de cajas que caben en una plancha
+        # total_cajas_por_plancha = cajas_en_ancho + cajas_en_largo
+
+        # if cajas_en_ancho == 1 and cajas_en_largo == 1:
+        #     total_cajas_por_plancha = 1
 
         """
         Porcentajes de venta a cargar en próxima plantilla
@@ -224,7 +241,7 @@ def procesar_datos(request):
                                                           'largo_hm_str':largo_hm_str,
                                                           'ancho_hm_str':ancho_hm_str,
                                                           'media_hm_str':media_hm_str,
-                                                          'plancha_necesaria':plancha_necesaria,
+                                                          'plancha_necesaria':plancha_seleccionada,
                                                           'excedente_vertical':excedente_vertical,
                                                           'excedente_horizontal':excedente_horizontal,
                                                           'total_cajas_por_plancha': total_cajas_por_plancha,})
