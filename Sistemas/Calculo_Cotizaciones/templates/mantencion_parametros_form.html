@@ -1,0 +1,85 @@
+{% extends 'layouts/base_nav_lateral.html' %}
+{% load static %}
+
+
+{% block nav_lateral %}
+<nav class="navbar navbar-dark align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0">
+    <div class="container-fluid d-flex flex-column p-0"><a class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0" href="#">
+            <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-box-open" style="color: var(--bs-danger);"></i></div>
+            <div class="sidebar-brand-text mx-3"><span>Adecar Ltda.</span></div>
+        </a>
+        <hr class="sidebar-divider my-0">
+        <ul class="navbar-nav text-light" id="accordionSidebar">
+            <li class="nav-item"><a class="nav-link" href="{% url 'cotizacion_manual' %}"><i class="fas fa-file-invoice-dollar"></i><span>Cotización</span></a></li>
+            <li class="nav-item"></li>
+            <li class="nav-item"></li>
+            <li class="nav-item"></li>
+            <li class="nav-item"><a class="nav-link" href="register.html"><i class="fas fa-th-list"></i><span>Cotizaciones Pendientes</span></a><a class="nav-link" href="profile.html"><i class="fas fa-history"></i><span>Historial de Cotizaciones</span></a><a class="nav-link" href="table.html"><i class="fas fa-cog"></i><span>Mantención de Planchas</span></a><a class="nav-link active" href="{% url 'mantencion_parametros_form' %}"><i class="fas fa-cog"></i><span>Mantención de Parámetros</span></a></li>
+        </ul>
+        <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button></div>
+    </div>
+</nav>
+{% endblock %}
+
+
+{% block nav_light %}
+
+{% endblock %}
+
+{% block section %}
+<style>
+    /* Estilos CSS para cambiar el color de las etiquetas a negro */
+    label {
+        color: black;
+    }
+    
+    /* Estilos para centrar el contenedor */
+    .form-container {
+        width: 50%; /* Ajusta esto según tus necesidades */
+        margin: 0 auto; /* Centra el contenedor */
+        text-align: center; /* Alinea el texto al centro */
+    }
+
+    .form-container form {
+        margin-bottom: 20px; /* Espacio entre los formularios */
+    }
+</style>
+
+<div class="form-container">
+    <!-- Formulario para buscar por ID -->
+    <form method="get" action="{% url 'mantencion_parametros_form' %}">
+        <input type="text" name="id_parametro" placeholder="Ingrese ID para editar">
+        <button type="submit">Buscar</button>
+    </form>
+
+    <!-- Formulario para editar o crear un nuevo registro -->
+    <form method="post" id="parametros-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Guardar Cambios</button>
+    </form>
+</div>
+{% endblock %}
+{% block js %}
+<script>
+window.addEventListener('DOMContentLoaded', (event) => {
+    {% if messages %}
+    {% for message in messages %}
+        alert("{{ message }}");
+        // Restablecer el formulario si el mensaje es de éxito
+        if ("{{ message.tags }}" === "success") {
+            setTimeout(function() {
+                document.getElementById('parametros-form').reset();
+            }, 500); // Espera 500 milisegundos
+        }
+        // Manejar mensaje de error
+        else if ("{{ message.tags }}" === "error") {
+            // Mostrar mensaje emergente y redirigir
+            alert('Datos no existentes');
+            window.location.href = '{% url 'mantencion_parametros_form' %}';
+        }
+    {% endfor %}
+    {% endif %}
+});
+</script>
+{% endblock %}

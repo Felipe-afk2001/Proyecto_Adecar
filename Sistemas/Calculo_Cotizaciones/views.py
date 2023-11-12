@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
@@ -10,6 +10,7 @@ from Calculo_Cotizaciones.models import Tipo_Plancha
 from django.db import connection
 import requests
 import math
+from .forms import ParametroForm
 import os
 
 def login_view(request):
@@ -38,6 +39,27 @@ def registrar(request):
         form = UserCreationForm()
     return render(request, 'registrar.html', {'form': form})
 
+def mantencion_parametros_form(request):
+    parametro_id = request.GET.get('id_parametro')
+    parametro = None
+
+    if parametro_id:
+        try:
+            parametro = Parametro.objects.get(id_parametro=parametro_id)
+        except Parametro.DoesNotExist:
+            messages.error(request, "Los datos solicitados no existen")
+            return redirect('mantencion_parametros_form')
+
+    if request.method == 'POST':
+        form = ParametroForm(request.POST, instance=parametro)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Cambios guardados con éxito!')
+            return redirect('mantencion_parametros_form')
+    else:
+        form = ParametroForm(instance=parametro)
+
+    return render(request, 'mantencion_parametros_form.html', {'form': form})
 """
 Seleccionar parámetros
 """

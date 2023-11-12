@@ -136,41 +136,7 @@ def calcular_vista(request):
                 p.drawString(100, y_coordinate, linea)
                 y_coordinate -= 20
 
-<<<<<<< HEAD
-            p.drawString(100, y_coordinate, f'precio_plancha: {precio_plancha}')
-            y_coordinate -= 20
-
-            p.drawString(100, y_coordinate, f'area_total_plancha: {area_total_plancha}')
-            y_coordinate -= 20
-
-            p.drawString(100, y_coordinate, f'area_caja: {area_caja}')
-            y_coordinate -= 20
-
-            p.drawString(100, y_coordinate, f'cantidad_cajas: {cantidad_caja}')
-            y_coordinate -= 20
-
-            p.drawString(100, y_coordinate, f'Cajas por plancha: {cantidad_plancha}')
-            y_coordinate -= 20
-
-            p.drawString(100, y_coordinate, f'coste_materia_prima: {coste_materia_prima}')
-            y_coordinate -= 20
-
-            p.drawString(100, y_coordinate, f'porcentaje_utilidad: {porcentaje_utilidad}')
-            y_coordinate -= 20
-
-            p.drawString(100, y_coordinate, f'coste_creacion: {coste_creacion}')
-            y_coordinate -= 20
-
-            p.drawString(100, y_coordinate, f'precio_caja: {precio_caja}')
-            y_coordinate -= 20
-
-            p.drawString(100, y_coordinate, f'precio_total: {precio_total}')
-            y_coordinate -= 20
-
-            # Cierra el objeto PDF y devuelve la respuesta.
-=======
             # Cierra el objeto PDF y devuelve la respuesta
->>>>>>> 68ea86b020ecd93321a0fbc6356e926cf2b85aef
             p.showPage()
             p.save()
 
