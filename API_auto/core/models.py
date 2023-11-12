@@ -1,70 +1,9 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
-
-class solicitud_cotizacion(models.Model):
-    id_cotizacion = models.IntegerField(primary_key=True)
-    id_cliente = models.IntegerField()
-    largo = models.DecimalField(max_digits=4, decimal_places=0)
-    ancho = models.DecimalField(max_digits=4, decimal_places=0)
-    alto = models.DecimalField(max_digits=4, decimal_places=0)
-    cantidad_caja = models.DecimalField(max_digits=4, decimal_places=0)
-    cod_carton = models.CharField(max_length=5)
-    comentario = models.CharField(max_length=400)
-
-    def __str__(self):
-        return self.id_cotizacion
-    
-class detalle_cotizacion(models.Model):
-    # identificadores
-    id_detalle_cotizacion = models.AutoField(primary_key=True)
-    id_solicitud_cotizacion = models.IntegerField(unique=True)
-    id_cliente = models.IntegerField(unique=True)
-    id_tipo_plancha = models.IntegerField()
-
-    # medidas
-    largo_caja = models.IntegerField()
-    ancho_caja = models.IntegerField()
-    alto_caja = models.IntegerField()
-    largo_placha = models.IntegerField()
-    ancho_plancha = models.IntegerField()
-
-    # calculos
-    area_caja = models.IntegerField()
-    area_total_plancha = models.IntegerField()
-    area_interior_plancha = models.IntegerField() 
-    coste_materia = models.IntegerField()
-    coste_creacion = models.IntegerField()
-    precio_caja = models.IntegerField()
-    cantidad_caja = models.IntegerField()
-    precio_total = models.IntegerField()
-    porcentaje_utilidad = models.DecimalField(max_digits=4, decimal_places=0)
-    excedente = models.IntegerField()
-    cantidad_plancha = models.IntegerField()
-    precio_plancha = models.IntegerField()
-
-    # Detalle
-    comentario = models.CharField(max_length=400)
-    cod_estado = models.CharField(max_length=5)
-    estado = models.CharField(max_length=15, unique=True)
-
-
-    def __str__(self):
-        return self.id_detalle_cotizacion
-    
-    def save(self, *args, **kwargs):
-        if not self.id_detalle_cotizacion:
-            # Si el registro no tiene un valor para id_detalle_cotizacion, asigna automáticamente el siguiente valor
-            last_record = detalle_cotizacion.objects.all().order_by('-id_detalle_cotizacion').first()
-            if last_record:
-                self.id_detalle_cotizacion = last_record.id_detalle_cotizacion + 1
-            else:
-                self.id_detalle_cotizacion = 1
-
-        super(detalle_cotizacion, self).save(*args, **kwargs)
     
 class UsuarioManager(BaseUserManager):
     def create_user(self, email, username, nombre, apellidos, password=None):
