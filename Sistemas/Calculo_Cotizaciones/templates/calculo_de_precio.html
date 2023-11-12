@@ -71,39 +71,40 @@
                                     </tr>
                                     <tr>
                                         <td>Costo excedente vertical:</td>
-                                        <td>n</td>
+                                        <td>${{costo_ex_vertical}}</td>
                                     </tr>
                                     <tr>
                                         <td>Costo excedente horizontal:</td>
-                                        <td>n</td>
+                                        <td>${{costo_ex_horizontal}}</td>
                                     </tr>
                                     <tr>
                                         <td>Precio costo por unidad:</td>
-                                        <td>n</td>
+                                        <td>${{costo_por_unidad}}</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                     <div class="col">
-                        <form action="#" method="post">
-                            <div class="row">
-                                <div class="col">
-                                    <label for="porcentajeVenta" style="margin-left: 36px;">Porcentaje Venta</label>
-                                    <select name="porcentajeVenta" id="porcentajeVenta" class="form-select" style="margin-left: 36px;">
-                                        <option value="">Selecciona un porcentaje</option>
-                                        {% for porcentaje in porcentajes %}
-                                            <option value="{{ porcentaje }}">{{ porcentaje }}%</option>
-                                        {% endfor %}
-                                    </select>
+                        <div class="row">
+                            <div class="col">
+                                <div class="input-group mb-3">
+                                    <input type="number" class="form-control" id="porcentaje" placeholder="Ingresa el porcentaje">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">$</span>
+                                    </div>
+                                    <input type="number" class="form-control" id="precio_final" placeholder="Precio final" disabled>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col" style="margin-top: 22px;">
-                                    <p style="margin-left: 35px;margin-right: 36px;">$</p>
-                                </div>
-                            </div>
-                        </form>
+                        </div>
+                        <div style="text-align: center;">
+                            <button type="button" class="btn btn-primary btn-sm">Generar cotización</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -132,4 +133,22 @@
 {% endblock %}
 
 {% block js %}
+<script>
+    document.getElementById('porcentaje').addEventListener('input', function() {
+        var porcentaje = this.value;
+        
+        // Validación para asegurar que sea un número positivo y no más de 4 dígitos
+        if (porcentaje < 0 || porcentaje.length > 4) {
+            alert("Por favor, ingresa un número positivo de no más de 4 dígitos.");
+            this.value = ''; // Limpiar el campo de porcentaje
+            document.getElementById('precio_final').value = '';
+            return; // Salir de la función si la validación falla
+        }
+
+        porcentaje = parseFloat(porcentaje);
+        var precioBase = {{ costo_por_unidad }}; // Esto lo pasas desde Django
+        var precioFinal = precioBase + (precioBase * (porcentaje / 100));
+        document.getElementById('precio_final').value = precioFinal.toFixed(2);
+    });
+</script>
 {% endblock %}

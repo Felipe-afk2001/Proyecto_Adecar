@@ -8,6 +8,7 @@ from Calculo_Cotizaciones.models import Parametro #Para hacer las validaciones d
 from django.http import JsonResponse, HttpResponse
 from Calculo_Cotizaciones.models import Tipo_Plancha
 from django.db import connection
+import requests
 import math
 
 def login_view(request):
@@ -36,44 +37,20 @@ def registrar(request):
         form = UserCreationForm()
     return render(request, 'registrar.html', {'form': form})
 
+"""
+Seleccionar parámetros
+"""
+def parametros_excedentes():
+    try:
+        parametro = Parametro.objects.get(id_parametro=1)
+        return parametro.excedente_horizontal, parametro.excedente_vertical
+    except Parametro.DoesNotExist:
+        # Manejar el caso en que el registro con id=1 no exista
+        return None, None
 
 """
 Selección de plancha a utilizar
 """
-
-# def seleccionar_plancha(largo_hm, media_hm, ancho_hm, tipo_carton):
-#     # Consulta SQL para plancha que acomode hoja madre más al menos una mitad
-#     sql_maximizada = """
-#     SELECT * FROM Tipo_Plancha
-#     WHERE largo >= %s AND largo >= %s AND ancho >= %s AND cod_carton = %s
-#     ORDER BY largo, ancho
-#     LIMIT 1
-#     """
-#     # Consulta SQL para plancha que acomode solo la hoja madre
-#     sql_solo_hm = """
-#     SELECT * FROM Tipo_Plancha
-#     WHERE largo >= %s AND ancho >= %s AND cod_carton = %s
-#     ORDER BY largo, ancho
-#     LIMIT 1
-#     """
-
-#     # Ejecuta la consulta para plancha maximizada
-#     with connection.cursor() as cursor:
-#         cursor.execute(sql_maximizada, [largo_hm + media_hm, largo_hm, ancho_hm, tipo_carton])
-#         result = cursor.fetchone()
-
-#         # Si no se encuentra una plancha maximizada, busca una para solo la hoja madre
-#         if not result:
-#             cursor.execute(sql_solo_hm, [largo_hm, ancho_hm, tipo_carton])
-#             result = cursor.fetchone()
-
-#     # Si hay un resultado, convertirlo en un diccionario
-#     if result:
-#         field_names = [col[0] for col in cursor.description]
-#         plancha_seleccionada = dict(zip(field_names, result))
-#         return plancha_seleccionada
-#     else:
-#         return None
 
 def calcular_cajas_por_plancha(largo_hm, media_hm, ancho_hm, tipo_carton):
     # Escribe la consulta SQL para encontrar la plancha más adecuada
@@ -189,40 +166,70 @@ def procesar_datos(request):
         excedente_horizontal = ancho_plancha - espacio_ocupado_en_ancho
         excedente_vertical = largo_plancha - espacio_ocupado_en_largo
 
-        # """
-        # Cálculo de cajas por plancha
-        # """
-        # largo_plancha = plancha_seleccionada.get('largo')
-        # ancho_plancha = plancha_seleccionada.get('ancho')
-
-        # # Calcula cuántas cajas caben en el ancho de la plancha (solo enteras)
-        # cajas_en_ancho = ancho_plancha // ancho_hm
-
-        #  # Calcula cuántas cajas caben en el largo de la plancha (enteras y mitades)
-        # cajas_enteras_en_largo = largo_plancha // largo_hm
-        # espacio_restante = largo_plancha % largo_hm
-        # cajas_en_largo = cajas_enteras_en_largo
-        # if espacio_restante >= largo_hm / 2:
-        #     cajas_en_largo += 0.5  # Añade media caja si hay espacio
-        
-        # # Calcula el total de cajas que caben en una plancha
-        # total_cajas_por_plancha = cajas_en_ancho + cajas_en_largo
-
-        # if cajas_en_ancho == 1 and cajas_en_largo == 1:
-        #     total_cajas_por_plancha = 1
-
         """
         Porcentajes de venta a cargar en próxima plantilla
         """
-        porcentajes = list(range(5, 105, 5)) 
+        porcentajes = list(range(5, 105, 5))
 
         """
         Validación de medida contra tabla de parámetros
-        (Podríamos agregar confirmación ya que se pueden ingresar más parámetros)
         """
         parametros = Parametro.objects.first()
         if largo1 > parametros.largo_maximo or ancho1 > parametros.ancho_maximo:
             mensaje_error = "Medidas inválidas. Por favor, vuelva e ingrese otro valor."
+
+        """
+        Costo de excedentes
+        """
+        def calcular_costo_excedentes(excedente_vert, excedente_horiz, costo_plancha, area_plancha, umbral_vertical, umbral_horizontal):
+            costo_excedente_vertical = 0
+            costo_excedente_horizontal = 0
+
+            # Costo del excedente horizontal
+            if excedente_horiz > umbral_horizontal:
+                area_excedente_horizontal = excedente_horiz * ancho_plancha
+                proporcion_horizontal = area_excedente_horizontal / area_plancha
+                costo_excedente_horizontal = costo_plancha * proporcion_horizontal
+
+            # Costo del excedente vertical
+            if excedente_vert > umbral_vertical:
+                area_excedente_vertical = excedente_vert * ancho_plancha
+                proporcion_vertical = area_excedente_vertical / area_plancha
+                costo_excedente_vertical = costo_plancha * proporcion_vertical
+
+            return costo_excedente_vertical, costo_excedente_horizontal
+
+        
+
+
+        """
+        Llamada a la API
+        """
+        coste_materia = plancha_seleccionada.get('precio_proveedor')
+        api_calculo(largo, ancho, alto, largo_plancha, ancho_plancha, coste_materia, 100, cantidad)
+        precio_unidad = 100
+
+        """
+        Llamada costo excedentes
+        """
+        excedente_horizontal_param, excedente_vertical_param = parametros_excedentes()
+        area_plancha_bd = plancha_seleccionada.get('area')
+        costo_ex_vertical, costo_ex_horizontal = calcular_costo_excedentes(
+            excedente_vert=excedente_vertical, 
+            excedente_horiz=excedente_horizontal,
+            costo_plancha=coste_materia, 
+            area_plancha=area_plancha_bd,
+            umbral_vertical=excedente_vertical_param,
+            umbral_horizontal=excedente_horizontal_param
+        )
+
+        """
+        Costo por unidad
+        """
+        # Asumiendo que total_cajas_por_plancha es el número total de cajas por plancha
+        coste_total_plancha = coste_materia - (costo_ex_vertical + costo_ex_horizontal)
+        costo_por_unidad = coste_total_plancha / total_cajas_por_plancha
+
     if mensaje_error:
         return render(request, 'cotizacion_manual.html', {'mensaje_error': mensaje_error})
     else:
@@ -244,7 +251,49 @@ def procesar_datos(request):
                                                           'plancha_necesaria':plancha_seleccionada,
                                                           'excedente_vertical':excedente_vertical,
                                                           'excedente_horizontal':excedente_horizontal,
-                                                          'total_cajas_por_plancha': total_cajas_por_plancha,})
+                                                          'total_cajas_por_plancha': total_cajas_por_plancha,
+                                                          'precio_base':precio_unidad,
+                                                          'costo_ex_vertical':round(costo_ex_vertical),
+                                                          'costo_ex_horizontal':round(costo_ex_horizontal),
+                                                          'costo_por_unidad':round(costo_por_unidad),})
 
 def calculo_de_precio(request):
     return render(request, 'calculo_de_precio.html')
+
+def api_calculo(largo, ancho, alto, largo_plancha, ancho_plancha,coste_materia, porcentaje_utilidad, cantidad):
+    """
+    Llamada a la api
+    """
+    # URL de tu API
+    url = 'http://localhost:8000/calcular/'
+    token = '95f397a7bce2f2ffbe6c404caa1994ae991c4ee5' #Token debe ser por consulta, está en la bd.
+
+    headers = {
+        'Authorization': f'Token {token}'
+    }
+
+    # Datos para enviar en la petición POST
+    datos_prueba = {
+        'largo_caja': largo,
+        'ancho_caja': ancho,
+        'alto_caja': alto,
+        'largo_plancha': largo_plancha,
+        'ancho_plancha': ancho_plancha,
+        'coste_materia': coste_materia,
+        'porcentaje_utilidad': 0, #Usar la del form
+        'coste_creacion': 200, #Costo fijo
+        'cantidad_caja': cantidad
+    }
+
+    # Realizar la petición POST
+    respuesta = requests.post(url, json=datos_prueba, headers=headers)
+
+    # Verificar la respuesta
+    print(f'Estado de la respuesta: {respuesta.status_code}')
+    if respuesta.status_code == 200:
+        print("PDF generado exitosamente.")
+        # Aquí puedes manejar el PDF, por ejemplo, guardarlo en un archivo
+        with open('cotizacion.pdf', 'wb') as f:
+            f.write(respuesta.content)
+        import webbrowser
+        webbrowser.open_new('cotizacion.pdf')
