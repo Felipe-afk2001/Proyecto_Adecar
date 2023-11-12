@@ -102,7 +102,7 @@ def calcular_vista(request):
             p.drawString(100, y_coordinate, f'cantidad_cajas: {cantidad_caja}')
             y_coordinate -= 20
 
-            p.drawString(100, y_coordinate, f'cantidad_planchas: {cantidad_plancha}')
+            p.drawString(100, y_coordinate, f'Cajas por plancha: {cantidad_plancha}')
             y_coordinate -= 20
 
             p.drawString(100, y_coordinate, f'coste_materia_prima: {coste_materia_prima}')
