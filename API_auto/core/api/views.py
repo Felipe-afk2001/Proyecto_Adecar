@@ -115,31 +115,54 @@ def calcular_vista(request):
 
             # Agregar contenido al PDF
 
-            y_coordinate = 800
+            margen_top = 950
+            margen_titulo = 800
+            margen_cliente = 850
+
             contenido_pdf = [
+                'Medidas Solicitadas',
+                f"Largo Caja: {data.get('largo_caja', 0)}",
+                f"Ancho Caja: {data.get('ancho_caja', 0)} ",
+                f"Alto Caja: {data.get('alto_caja', 0)}",
+                f'',
+                f'Medidas Calculadas',
                 f'Largo total de la caja: {largo_maximo_caja}',
-                f'largo_total:  {largo_maximo_caja}',
-                f'alto_total: {alto_max_caja}',
-                f'precio_plancha: {precio_plancha}',
-                f'area_total_plancha: {area_total_plancha}',
-                f'area_caja: {area_caja}',
-                f'cantidad_cajas: {cantidad_caja}',
-                f'cantidad_planchas: {cantidad_plancha}',
-                f'coste_materia_prima: {coste_materia_prima}',
-                f'porcentaje_utilidad: {porcentaje_utilidad}',
-                f'coste_creacion: {coste_creacion}',
-                f'precio_caja:{precio_caja}',
-                f'precio_total: {precio_total}'
+                f'Alto total de la caja: {alto_max_caja}',
+                f'Area total de la caja: {area_caja}',
+                f'',
+                f'Detalle Cotizacion'
+                f'Tipo de plancha: {id_tipo_plancha}'
+                f'Area total de la plancha: {area_total_plancha}',
+                f'Cantidad de cajas solicitadas: {cantidad_caja}',
+                f'Cantidad de planchas solicitadas: {cantidad_plancha}',
+                f'Costos por la cantidad de planchas: {coste_materia_prima}',
+                f'Porcentaje de benedicio empresa: {porcentaje_utilidad}',
+                f'Costo de creacion de una caja: {coste_creacion}',
+                f'Precio Unitario por Caja:{precio_caja}',
+                f'Precio Total por Cajas: {precio_total}'
+            ]
+            contenido_cliente = [
+                'Procesado para',
+                f'Cliente: {nombre_cliente}',
+                f'Correo: {correo_cliente}',
+                f'Rut: {rut_cliente}'
             ]
 
+            p.drawString(80, margen_titulo, f'Cotizacion N° {id_solicitud}')
+
+            p.drawString(20, (margen_titulo), 'Adecar')
+            
+            for linea in contenido_cliente:
+                p.drawString(80, margen_cliente, linea)
+                margen_cliente -= 20
+
             for linea in contenido_pdf:
-                p.drawString(100, y_coordinate, linea)
-                y_coordinate -= 20
+                p.drawString(100, margen_top, linea)
+                margen_top -= 20
 
             # Cierra el objeto PDF y devuelve la respuesta
             p.showPage()
             p.save()
-
 
             # Enviar correo electrónico con el PDF adjunto
             email = EmailMessage(
