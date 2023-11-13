@@ -17,12 +17,14 @@ Including another URLconf
 # myapp/urls.py
 from django.urls import path, include
 from django.contrib import admin
-from core.api.views import calcular_vista
+from core.api.views import calcular_auto, calcular_manual, crear_pdf_manual
 
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('calcular/', calcular_vista, name='calcular'),
+    path('calcular_auto/', calcular_auto, name='calcular_auto'),
+    path('calcular_manual/', calcular_manual, name='calcular_manual'),
+    path('crear_pdf/', crear_pdf_manual, name='crear_pdf_manual'),
 
 ]
