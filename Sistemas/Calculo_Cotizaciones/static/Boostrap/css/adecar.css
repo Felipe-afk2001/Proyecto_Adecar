@@ -17,3 +17,8 @@ body {
 
 }
 
+.form-control {
+    width: 100%;       /* Ocupar todo el ancho disponible */
+    resize: vertical;  /* Permitir ajustar el tamaño verticalmente */
+    /* Otros estilos como padding, bordes, etc. */
+}

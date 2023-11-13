@@ -66,8 +66,8 @@ def calcular_manual(request):
             area_total_plancha = math.ceil(area_total_plancha)  
 
                 #calculo exedentes
-            exedente_vertical = ancho_plancha - largo_maximo_caja
-            exedente_horizontal = largo_plancha - alto_max_caja
+            exedente_vertical = ancho_plancha - alto_max_caja
+            exedente_horizontal = largo_plancha - largo_maximo_caja # CAMBIE EL ORDEN PORQUE EL ALTO SE RESTABA AL LARGO. HAY QUE VERLA PORQUE NO CONTEMPLA LAS CANTIDADES POR HOJA, TOMA UN EXCEDENTE POR SOLO UNA DENTRO DE LA PLANCHA
 
                 #calculo de cantidad de planchas
             dif_largo = largo_plancha / largo_maximo_caja
@@ -83,7 +83,7 @@ def calcular_manual(request):
                 cantidad_plancha = math.ceil(cantidad_plancha)
 
                 #calculo costo de la materia prima
-            coste_materia_prima = (cantidad_plancha * precio_plancha)
+            coste_materia_prima = (precio_plancha / cantidad_plancha) #PIPE TE LO CAMBIE POR DIVISION, DABA MAS DEL PRECIO DE PLANCHA. ESTABA CANTIDAD PLANCHA x PRECIO PLANCHA
             coste_materia_prima = math.ceil(coste_materia_prima)  
 
                 #calculo de precio de caja unitaria

@@ -14,7 +14,7 @@
             <li class="nav-item"></li>
             <li class="nav-item"></li>
             <li class="nav-item"></li>
-            <li class="nav-item"><a class="nav-link" href="register.html"><i class="fas fa-th-list"></i><span>Cotizaciones Pendientes</span></a><a class="nav-link" href="profile.html"><i class="fas fa-history"></i><span>Historial de Cotizaciones</span></a><a class="nav-link" href="table.html"><i class="fas fa-cog"></i><span>Mantención de Planchas</span></a><a class="nav-link" href="login.html"><i class="fas fa-cog"></i><span>Mantención de Parámetros</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="register.html"><i class="fas fa-th-list"></i><span>Cotizaciones Pendientes</span></a><a class="nav-link" href="profile.html"><i class="fas fa-history"></i><span>Historial de Cotizaciones</span></a><a class="nav-link" href="table.html"><i class="fas fa-cog"></i><span>Mantención de Planchas</span></a><a class="nav-link" href="login.html"><i class="fas fa-cog"></i><span>Mantención de Parámetros</span></a><a class="nav-link" href="login.html"><i class="fas fa-external-link-alt"></i><span>Salir</span></a></li>
         </ul>
         <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button></div>
     </div>
@@ -30,6 +30,12 @@
                     <div class="col-md-6">
                         <div class="table-responsive">
                             <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre cliente:</th>
+                                        <th>{{nombre_cliente}} {{apellido_cliente}}</th>
+                                    </tr>
+                                </thead>
                                 <thead>
                                     <tr>
                                         <th>Medidas de caja:</th>
@@ -50,11 +56,11 @@
                                         <td>{{plancha_necesaria.largo}} x {{plancha_necesaria.ancho}} (mm), {{plancha_necesaria.cod_carton}}</td>
                                     </tr>
                                     <tr>
-                                        <td>Precio:</td>
-                                        <td>${{plancha_necesaria.precio_proveedor}} pesos/hoja</td>
+                                        <td>Precio plancha:</td>
+                                        <td>${{api_precio_plancha}} pesos/hoja</td>
                                     </tr>
                                     <tr>
-                                        <td>Hoja Madre:</td>
+                                        <td>Hoja Madre (Corte):</td>
                                         <td>{{largo_hm_str}} x {{ancho_hm_str}} (mm)</td>
                                     </tr>
                                     <tr>

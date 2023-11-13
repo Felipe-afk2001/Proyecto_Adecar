@@ -14,7 +14,7 @@
             <li class="nav-item"></li>
             <li class="nav-item"></li>
             <li class="nav-item"></li>
-            <li class="nav-item"><a class="nav-link" href="register.html"><i class="fas fa-th-list"></i><span>Cotizaciones Pendientes</span></a><a class="nav-link" href="profile.html"><i class="fas fa-history"></i><span>Historial de Cotizaciones</span></a><a class="nav-link" href="table.html"><i class="fas fa-cog"></i><span>Mantención de Planchas</span></a><a class="nav-link" href="{% url 'mantencion_parametros_form' %}"><i class="fas fa-cog"></i><span>Mantención de Parámetros</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="register.html"><i class="fas fa-th-list"></i><span>Cotizaciones Pendientes</span></a><a class="nav-link" href="profile.html"><i class="fas fa-history"></i><span>Historial de Cotizaciones</span></a><a class="nav-link" href="table.html"><i class="fas fa-cog"></i><span>Mantención de Planchas</span></a><a class="nav-link" href="{% url 'mantencion_parametros_form' %}"><i class="fas fa-cog"></i><span>Mantención de Parámetros</span></a><a class="nav-link" href="login.html"><i class="fas fa-external-link-alt"></i><span>Salir</span></a></li>
         </ul>
         <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button></div>
     </div>
@@ -73,6 +73,15 @@
                     <h2 class="text-center mb-4" style="color: black;">Cotización Manual</h2>
                     <form method="post" action="{% url 'procesar_datos' %}" onsubmit="return validarFormulario()">
                         {% csrf_token %}
+                        <div class="mb-3">
+                            <input class="form-control" type="text" id="nombre_cliente" name="nombre_cliente" placeholder="Nombre de cliente" step="any" required maxlength="50">
+                        </div>
+                        <div class="mb-3">
+                            <input class="form-control" type="text" id="apellido_cliente" name="apellido_cliente" placeholder="Apellido de cliente" step="any" required maxlength="50">
+                        </div>
+                        <div class="mb-3">
+                            <input class="form-control" type="email" id="correo_cliente" name="correo_cliente" placeholder="Correo electrónico" step="any" required maxlength="255">
+                        </div>
                         <div class="mb-3">
                             <input class="form-control" type="number" id="largo" name="largo" placeholder="Largo (mm)" min="0" step="any" required maxlength="10">
                         </div>

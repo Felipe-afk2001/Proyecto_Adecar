@@ -1,7 +1,6 @@
 {% extends 'layouts/base_nav_lateral.html' %}
 {% load static %}
 
-
 {% block nav_lateral %}
 <nav class="navbar navbar-dark align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0">
     <div class="container-fluid d-flex flex-column p-0"><a class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0" href="#">
@@ -27,51 +26,62 @@
 {% endblock %}
 
 {% block section %}
+<style>
+    .center-form {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 15px;
+    }
+    .center-form h2 {
+        text-align: center; /* Centra el título */
+        margin-bottom: 20px;
+    }
+    .form-group label,
+    .form-group input,
+    .form-group textarea {
+        width: 100%; /* Ocupa todo el ancho disponible */
+        display: block; /* Cada elemento ocupa su propia línea */
+    }
+    .form-group {
+        margin-bottom: 15px; /* Espacio entre los campos del formulario */
+    }
+    .button-container {
+        text-align: center; /* Centra el botón */
+        margin-top: 20px;
+    }
+    .button-container button {
+        display: inline-block; /* Mantiene el tamaño original del botón */
+        width: auto; /* Permite que el botón tenga el ancho del contenido */
+    }
+</style>
 
-
-<div class="container mt-5">
-    <h2 class="mb-4">Parámetros</h2>
-    <table class="table table-bordered table-hover">
-        <thead class="thead-dark">
-            <tr>
-                <th>ID</th>
-                <th>Largo Máximo</th>
-                <th>Ancho Máximo</th>
-                <th>Excedente Horizontal</th>
-                <th>Excedente Vertical</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% if parametros %}
-                {% for parametro in parametros %}
-                <tr>
-                    <td>{{ parametro.id_parametro }}</td>
-                    <td>{{ parametro.largo_maximo }}</td>
-                    <td>{{ parametro.ancho_maximo }}</td>
-                    <td>{{ parametro.excedente_horizontal }}</td>
-                    <td>{{ parametro.excedente_vertical }}</td>
-                    <td>
-                        <a href="{% url 'editar_parametro' parametro.id_parametro %}" class="btn btn-primary btn-sm">Editar</a>
-                        <a href="{% url 'eliminar_parametro' parametro.id_parametro %}" class="btn btn-danger btn-sm">Eliminar</a>
-                    </td>
-                </tr>
+<div class="container mt-4">
+    <div class="center-form">
+        <h2 class="mb-4">Editar Parámetro</h2>
+        <form method="post" action="">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.help_text %}
+                <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
                 {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="6">No hay parámetros para mostrar</td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
+            </div>
+            {% endfor %}
+            <div class="button-container">
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
 </div>
+{% endblock %}
 
-<div class="container mt-5">
-    <!-- Botón para crear un nuevo parámetro -->
-    <a href="{% url 'crear_parametro' %}" class="btn btn-success mb-3">Crear Nuevo Parámetro</a>
-    
-    <!-- Aquí va tu tabla existente -->
-</div>
-{% endblock %}
-{% block js %}
-{% endblock %}
+
+
+

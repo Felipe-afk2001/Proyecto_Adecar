@@ -38,6 +38,41 @@ def registrar(request):
     else:
         form = UserCreationForm()
     return render(request, 'registrar.html', {'form': form})
+"""
+-----------------------------------------------------------------------------
+Mantención de parámetros
+-----------------------------------------------------------------------------
+"""
+
+def lista_parametros(request):
+    parametros = Parametro.objects.all()
+    return render(request, 'mantencion_parametros_form.html', {'parametros': parametros})
+
+def editar_parametro(request, id):
+    parametro = get_object_or_404(Parametro, pk=id)
+    if request.method == 'POST':
+        form = ParametroForm(request.POST, instance=parametro)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_parametros')
+    else:
+        form = ParametroForm(instance=parametro)
+    return render(request, 'editar_parametros.html', {'form': form, 'parametro': parametro})
+
+def eliminar_parametro(request, id):
+    parametro = get_object_or_404(Parametro, pk=id)
+    parametro.delete()
+    return redirect('lista_parametros')
+
+def crear_parametro(request):
+    if request.method == 'POST':
+        form = ParametroForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_parametros')  # O donde quieras redirigir después de crear
+    else:
+        form = ParametroForm()  # Un formulario vacío para un nuevo registro
+    return render(request, 'crear_parametros.html', {'form': form})
 
 def mantencion_parametros_form(request):
     parametro_id = request.GET.get('id_parametro')
@@ -58,8 +93,45 @@ def mantencion_parametros_form(request):
             return redirect('mantencion_parametros_form')
     else:
         form = ParametroForm(instance=parametro)
+    todos_los_parametros = Parametro.objects.all()
 
-    return render(request, 'mantencion_parametros_form.html', {'form': form})
+    return render(request, 'mantencion_parametros_form.html', {'form': form, 'parametros': todos_los_parametros})
+
+"""
+API Cálculo (No PDF)
+"""
+def enviar_solicitud_api(largo, ancho, alto, largo_plancha, ancho_plancha, coste_materia, cantidad):
+    # URL de tu API
+    url = 'http://localhost:8000/calcular_manual/'
+    token = '95f397a7bce2f2ffbe6c404caa1994ae991c4ee5'  # Token de autenticación
+
+    headers = {'Authorization': f'Token {token}'}
+
+    # Datos para enviar en la petición POST
+    datos_prueba = {
+        'largo_caja': largo,
+        'ancho_caja': ancho,
+        'alto_caja': alto,
+        'largo_plancha': largo_plancha,
+        'ancho_plancha': ancho_plancha,
+        'coste_materia': coste_materia,
+        'coste_creacion': 50,  # Costo fijo
+        'cantidad_caja': cantidad,
+        # Agregar aquí otros campos necesarios si los tienes, como id_cliente, etc.
+    }
+
+    try:
+        # Realizar la petición POST
+        respuesta = requests.post(url, json=datos_prueba, headers=headers)
+        
+        if respuesta.status_code == 200:
+            return respuesta.json()  # Devolver los datos de la respuesta
+        else:
+            print(f"Error en la solicitud: {respuesta.status_code}, Respuesta: {respuesta.text}")
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"Ocurrió un error al hacer la solicitud: {e}")
+        return None
 """
 Seleccionar parámetros
 """
@@ -72,7 +144,9 @@ def parametros_excedentes():
         return None, None
 
 """
+-----------------------------------------------------------------------------
 Selección de plancha a utilizar
+-----------------------------------------------------------------------------
 """
 
 def calcular_cajas_por_plancha(largo_hm, media_hm, ancho_hm, tipo_carton):
@@ -108,12 +182,34 @@ VISTAS DE COTIZACIÓN MANUAL
 -----------------------------------------------------------------------------
 """
 
+# def visualiza_pdf(request):
+#     if request.method == 'POST':
+#         porcentaje = request.POST.get('porcentaje')
+#         # Procesa otros datos del formulario según sea necesario
+#         # ...
+#         return render(request, 'visualiza_pdf', {'porcentaje': porcentaje})
+#     else:
+#         # Manejar otros métodos o devolver un error
+#         pass
 def cotizacion_manual (request):
     return render(request, 'cotizacion_manual.html')
 
 def cotizacion_manual_2(request):
     return render(request, 'cotizacion_manual_2.html')
 
+def calculo_de_precio(request):
+    return render(request, 'calculo_de_precio.html')
+
+def calculo_de_precio_2(request):
+    return render(request, 'calculo_de_precio_2.html')
+
+
+
+"""
+-----------------------------------------------------------------------------
+PROCESAR DATOS FORMULARIO MANUAL
+-----------------------------------------------------------------------------
+"""
 def procesar_datos(request):
     mensaje_error = None #inicializador
     if request.method == 'POST':
@@ -125,6 +221,8 @@ def procesar_datos(request):
         altostr = request.POST.get('alto')
         cantidad = int(request.POST.get('cantidad_cajas'))
         tipo_carton = request.POST.get('tipo_carton').upper()
+        nombre_cliente = request.POST.get('nombre_cliente')
+        apellido_cliente = request.POST.get('apellido_cliente')
 
         """
         Calcula largo de hoja
@@ -175,6 +273,7 @@ def procesar_datos(request):
         """
         largo_plancha = plancha_seleccionada.get('largo')
         ancho_plancha = plancha_seleccionada.get('ancho')
+        coste_materia = plancha_seleccionada.get('precio_proveedor')
 
         # Calcula cuántas cajas caben en el ancho de la plancha (solo enteras)
         cajas_en_ancho = ancho_plancha // ancho_hm
@@ -231,8 +330,41 @@ def procesar_datos(request):
         """
         Llamada a la API
         """
-        coste_materia = plancha_seleccionada.get('precio_proveedor')
-        api_calculo(largo, ancho, alto, largo_plancha, ancho_plancha, coste_materia, 100, cantidad)
+        # Ejemplo de cómo llamar a la función
+        resultado_api = enviar_solicitud_api(largo, ancho, alto, plancha_seleccionada.get('largo'),plancha_seleccionada.get('ancho'),plancha_seleccionada.get('precio_proveedor'), cantidad)
+        if resultado_api:
+            # Suponiendo que resultado_api contiene la respuesta de la API
+            api_fecha_solicitud = resultado_api['fecha_solicitud']
+            api_fecha_vencimiento = resultado_api['fecha_vencimiento']
+            api_id_cliente = resultado_api['id_cliente']
+            api_rut_cliente = resultado_api['rut_cliente']
+            api_nombre_cliente = resultado_api['nombre_cliente']
+            api_correo_cliente = resultado_api['correo_cliente']
+            api_id_solicitud = resultado_api['id_solicitud']
+            api_comentario = resultado_api['comentario']
+            api_largo_maximo_caja = resultado_api['largo_maximo_caja']
+            api_ancho_maximo_caja = resultado_api['alto_maximo_caja']
+            api_area_caja = resultado_api['area_caja']
+            api_id_tipo_plancha = resultado_api['id_tipo_plancha']
+            api_cod_carton = resultado_api['cod_carton']
+            api_largo_plancha = resultado_api['largo_plancha']
+            api_ancho_plancha = resultado_api['ancho_plancha']
+            api_area_total_plancha = resultado_api['area_total_plancha']
+            api_exedente_horizontal = resultado_api['exedente_horizontal']
+            api_exedente_vertical = resultado_api['exedente_vertical']
+            api_dif_largo = resultado_api['dif_largo']
+            api_dif_alto = resultado_api['dif_alto']
+            api_precio_plancha = resultado_api['precio_plancha']
+            api_coste_creacion = resultado_api['coste_creacion']
+            api_coste_materia_prima = resultado_api['coste_materia_prima']
+            api_cantidad_cajas = resultado_api['cantidad_cajas']
+            api_cantidad_x_plancha = resultado_api['cantidad_planchas']
+            api_precio_caja = resultado_api['precio_caja']
+            api_precio_total = resultado_api['precio_total']
+
+            print(resultado_api)
+        else:
+            print("No se obtuvieron datos de la API.")
         precio_unidad = 100
 
         """
@@ -259,74 +391,61 @@ def procesar_datos(request):
     if mensaje_error:
         return render(request, 'cotizacion_manual.html', {'mensaje_error': mensaje_error})
     else:
-        return render(request, 'calculo_de_precio.html',{'largo':largo,
+        return render(request, 'calculo_de_precio.html',{'api_fecha_solicitud':api_fecha_solicitud, #API
+                                                         'largo':largo,
                                                           'ancho':ancho,
                                                           'alto':alto,
-                                                          'cantidad':cantidad,
-                                                          'tipo_carton':tipo_carton,
-                                                          'porcentajes':porcentajes,
                                                           'largostr':largostr,
                                                           'anchostr':anchostr,
                                                           'altostr':altostr,
+                                                          'cantidad':api_cantidad_cajas, #API
+                                                          'tipo_carton':tipo_carton,
+                                                          'api_precio_plancha':api_precio_plancha, #API
                                                           'largo_hm':largo_hm,
                                                           'ancho_hm':ancho_hm,
                                                           'media_hm':media_hm,
-                                                          'largo_hm_str':largo_hm_str,
-                                                          'ancho_hm_str':ancho_hm_str,
+                                                          'largo_hm_str':api_largo_maximo_caja, #API
+                                                          'ancho_hm_str':api_ancho_maximo_caja, #API
                                                           'media_hm_str':media_hm_str,
                                                           'plancha_necesaria':plancha_seleccionada,
-                                                          'excedente_vertical':excedente_vertical,
-                                                          'excedente_horizontal':excedente_horizontal,
-                                                          'total_cajas_por_plancha': total_cajas_por_plancha,
-                                                          'precio_base':precio_unidad,
+                                                          'api_area_total_plancha':api_area_total_plancha, #API
+                                                          'excedente_vertical':api_exedente_vertical, #API VER
+                                                          'excedente_horizontal':api_exedente_horizontal, #API VER
+                                                          'total_cajas_por_plancha': api_cantidad_x_plancha, #API
                                                           'costo_ex_vertical':round(costo_ex_vertical),
                                                           'costo_ex_horizontal':round(costo_ex_horizontal),
-                                                          'costo_por_unidad':round(costo_por_unidad),})
-
-def calculo_de_precio(request):
-    return render(request, 'calculo_de_precio.html')
-def calculo_de_precio_2(request):
-    return render(request, 'calculo_de_precio_2.html')
-
-def api_calculo(largo, ancho, alto, largo_plancha, ancho_plancha, coste_materia, porcentaje_utilidad, cantidad):
-    # URL de tu API
-    url = 'http://localhost:8000/calcular/'
-    token = '95f397a7bce2f2ffbe6c404caa1994ae991c4ee5'  # Token debe ser por consulta, está en la bd.
-
-    headers = {'Authorization': f'Token {token}'}
-
-    # Datos para enviar en la petición POST
-    datos_prueba = {
-        'largo_caja': largo,
-        'ancho_caja': ancho,
-        'alto_caja': alto,
-        'largo_plancha': largo_plancha,
-        'ancho_plancha': ancho_plancha,
-        'coste_materia': coste_materia,
-        'porcentaje_utilidad': 0,  # Usar la del form
-        'coste_creacion': 200,  # Costo fijo
-        'cantidad_caja': cantidad
-    }
-
-    # Realizar la petición POST
-    respuesta = requests.post(url, json=datos_prueba, headers=headers)
-
-    # Verificar la respuesta
-    print(f'Estado de la respuesta: {respuesta.status_code}')
-    if respuesta.status_code == 200:
-        print("PDF generado exitosamente.")
-        # # Ruta de la carpeta donde quieres guardar el PDF
-        # ruta_pdf = os.path.join('statics', 'pdf', 'cotizacion.pdf')
-
-        # # Guardar el PDF en la carpeta statics/pdf
-        # with open(ruta_pdf, 'wb') as f:
-        #     f.write(respuesta.content)
-
-        # Opcional: Abrir el PDF en el navegador (comentado)
-        # import webbrowser
-        # webbrowser.open_new(ruta_pdf)
+                                                          'costo_por_unidad':round(api_precio_caja),
+                                                          'nombre_cliente':nombre_cliente,
+                                                          'apellido_cliente':apellido_cliente}) #API VER     
+        
+    
+        # return render(request, 'calculo_de_precio.html',{'largo':largo,
+        #                                                   'ancho':ancho,
+        #                                                   'alto':alto,
+        #                                                   'cantidad':cantidad,
+        #                                                   'tipo_carton':tipo_carton,
+        #                                                   'porcentajes':porcentajes,
+        #                                                   'largostr':largostr,
+        #                                                   'anchostr':anchostr,
+        #                                                   'altostr':altostr,
+        #                                                   'largo_hm':largo_hm,
+        #                                                   'ancho_hm':ancho_hm,
+        #                                                   'media_hm':media_hm,
+        #                                                   'largo_hm_str':largo_hm_str,
+        #                                                   'ancho_hm_str':ancho_hm_str,
+        #                                                   'media_hm_str':media_hm_str,
+        #                                                   'plancha_necesaria':plancha_seleccionada,
+        #                                                   'excedente_vertical':excedente_vertical,
+        #                                                   'excedente_horizontal':excedente_horizontal,
+        #                                                   'total_cajas_por_plancha': total_cajas_por_plancha,
+        #                                                   'precio_base':precio_unidad,
+        #                                                   'costo_ex_vertical':round(costo_ex_vertical),
+        #                                                   'costo_ex_horizontal':round(costo_ex_horizontal),
+        #                                                   'costo_por_unidad':round(costo_por_unidad),})
 
 def procesar_datos_2(request):
+
+
     mensaje_error = None #inicializador
     if request.method == 'POST':
         largo = float(request.POST.get('largo'))
@@ -444,13 +563,14 @@ def procesar_datos_2(request):
         """
         Llamada a la API
         """
-        coste_materia = plancha_seleccionada.get('precio_proveedor')
-        api_calculo(largo, ancho, alto, largo_plancha, ancho_plancha, coste_materia, 100, cantidad)
+        # Ejemplo de cómo llamar a la función
+        enviar_solicitud_api(largo, ancho, alto, plancha_seleccionada.get('largo'),plancha_seleccionada.get('ancho'),plancha_seleccionada.get('precio_proveedor'), cantidad)
         precio_unidad = 100
 
         """
         Llamada costo excedentes
         """
+        coste_materia = plancha_seleccionada.get('precio_proveedor')
         excedente_horizontal_param, excedente_vertical_param = parametros_excedentes()
         area_plancha_bd = plancha_seleccionada.get('area')
         costo_ex_vertical, costo_ex_horizontal = calcular_costo_excedentes(
