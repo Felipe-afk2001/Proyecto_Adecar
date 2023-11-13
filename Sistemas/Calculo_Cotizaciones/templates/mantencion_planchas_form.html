@@ -14,7 +14,7 @@
             <li class="nav-item"></li>
             <li class="nav-item"></li>
             <li class="nav-item"></li>
-            <li class="nav-item"><a class="nav-link" href="register.html"><i class="fas fa-th-list"></i><span>Cotizaciones Pendientes</span></a><a class="nav-link" href="profile.html"><i class="fas fa-history"></i><span>Historial de Cotizaciones</span></a><a class="nav-link" href="{% url 'mantencion_planchas_form' %}"><i class="fas fa-cog"></i><span>Mantención de Planchas</span></a><a class="nav-link active" href="{% url 'mantencion_parametros_form' %}"><i class="fas fa-cog"></i><span>Mantención de Parámetros</span></a><a class="nav-link" href="login.html"><i class="fas fa-external-link-alt"></i><span>Salir</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="register.html"><i class="fas fa-th-list"></i><span>Cotizaciones Pendientes</span></a><a class="nav-link" href="profile.html"><i class="fas fa-history"></i><span>Historial de Cotizaciones</span></a><a class="nav-link active" href="{% url 'mantencion_planchas_form' %}"><i class="fas fa-cog"></i><span>Mantención de Planchas</span></a><a class="nav-link" href="{% url 'mantencion_parametros_form' %}"><i class="fas fa-cog"></i><span>Mantención de Parámetros</span></a><a class="nav-link" href="login.html"><i class="fas fa-external-link-alt"></i><span>Salir</span></a></li>
         </ul>
         <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button></div>
     </div>
@@ -30,36 +30,38 @@
 
 
 <div class="container mt-5">
-    <h2 class="mb-4">Parámetros</h2>
+    <h2 class="mb-4">Planchas</h2>
     <table class="table table-bordered table-hover">
         <thead class="thead-dark">
             <tr>
                 <th>ID</th>
-                <th>Largo Máximo</th>
-                <th>Ancho Máximo</th>
-                <th>Excedente Horizontal</th>
-                <th>Excedente Vertical</th>
+                <th>Largo de Plancha</th>
+                <th>Ancho de Plancha</th>
+                <th>Área de Plancha</th>
+                <th>Tipo de Cartón</th>
+                <th>Precio de Proveedor</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            {% if parametros %}
-                {% for parametro in parametros %}
+            {% if planchas %}
+                {% for plancha in planchas %}
                 <tr>
-                    <td>{{ parametro.id_parametro }}</td>
-                    <td>{{ parametro.largo_maximo }}</td>
-                    <td>{{ parametro.ancho_maximo }}</td>
-                    <td>{{ parametro.excedente_horizontal }}</td>
-                    <td>{{ parametro.excedente_vertical }}</td>
+                    <td>{{ plancha.id_tipo_plancha }}</td>
+                    <td>{{ plancha.largo|floatformat:0 }}</td>
+                    <td>{{ plancha.ancho|floatformat:0 }}</td>
+                    <td>{{ plancha.alto|floatformat:0 }}</td>
+                    <td>{{ plancha.cod_carton }}</td>
+                    <td>{{ plancha.precio_proveedor }}</td>
                     <td>
-                        <a href="{% url 'editar_parametro' parametro.id_parametro %}" class="btn btn-primary btn-sm">Editar</a>
-                        <a href="{% url 'eliminar_parametro' parametro.id_parametro %}" class="btn btn-danger btn-sm">Eliminar</a>
+                        <a href="{% url 'editar_plancha' plancha.id_tipo_plancha %}" class="btn btn-primary btn-sm">Editar</a>
+                        <a href="{% url 'eliminar_plancha' plancha.id_tipo_plancha %}" class="btn btn-danger btn-sm">Eliminar</a>
                     </td>
                 </tr>
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="6">No hay parámetros para mostrar</td>
+                    <td colspan="6">No hay planchas para mostrar</td>
                 </tr>
             {% endif %}
         </tbody>
@@ -68,7 +70,7 @@
 
 <div class="container mt-5">
     <!-- Botón para crear un nuevo parámetro -->
-    <a href="{% url 'crear_parametro' %}" class="btn btn-success mb-3">Crear Nuevo Parámetro</a>
+    <a href="{% url 'crear_plancha' %}" class="btn btn-success mb-3">Ingresar nueva plancha</a>
     
     <!-- Aquí va tu tabla existente -->
 </div>

@@ -10,7 +10,7 @@ from Calculo_Cotizaciones.models import Tipo_Plancha
 from django.db import connection
 import requests
 import math
-from .forms import ParametroForm
+from .forms import ParametroForm, PlanchaForm
 import os
 
 def login_view(request):
@@ -38,6 +38,64 @@ def registrar(request):
     else:
         form = UserCreationForm()
     return render(request, 'registrar.html', {'form': form})
+
+"""
+Mantención de planchas
+"""
+def lista_planchas(request):
+    planchas = Tipo_Plancha.objects.all()
+    return render(request, 'mantencion_planchas_form.html', {'planchas': planchas})
+
+def editar_plancha(request, id):
+    plancha = get_object_or_404(Tipo_Plancha, pk=id)
+    if request.method == 'POST':
+        form = PlanchaForm(request.POST, instance=plancha)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_planchas')
+    else:
+        form = PlanchaForm(instance=plancha)
+    return render(request, 'editar_planchas.html', {'form': form, 'plancha': plancha})
+
+def eliminar_plancha(request, id):
+    plancha = get_object_or_404(Tipo_Plancha, pk=id)
+    plancha.delete()
+    return redirect('lista_planchas')
+
+def crear_plancha(request):
+    if request.method == 'POST':
+        form = PlanchaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_planchas')
+    else:
+        form = PlanchaForm()  
+    return render(request, 'crear_planchas.html', {'form': form})
+
+
+def mantencion_planchas_form(request):
+    plancha_id = request.GET.get('id_tipo_plancha')
+    plancha = None
+
+    if plancha_id:
+        try:
+            plancha = Tipo_Plancha.objects.get(id_tipo_plancha=plancha_id)
+        except Tipo_Plancha.DoesNotExist:
+            messages.error(request, "Los datos solicitados no existen")
+            return redirect('mantencion_planchas_form')
+
+    if request.method == 'POST':
+        form = PlanchaForm(request.POST, instance=plancha)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Cambios guardados con éxito!')
+            return redirect('mantencion_planchas_form')
+    else:
+        form = PlanchaForm(instance=plancha)
+    todas_las_planchas = Tipo_Plancha.objects.all()
+
+    return render(request, 'mantencion_planchas_form.html', {'form': form, 'planchas': todas_las_planchas})
+
 """
 -----------------------------------------------------------------------------
 Mantención de parámetros

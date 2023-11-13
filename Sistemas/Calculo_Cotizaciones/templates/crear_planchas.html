@@ -13,16 +13,11 @@
             <li class="nav-item"></li>
             <li class="nav-item"></li>
             <li class="nav-item"></li>
-            <li class="nav-item"><a class="nav-link" href="register.html"><i class="fas fa-th-list"></i><span>Cotizaciones Pendientes</span></a><a class="nav-link" href="profile.html"><i class="fas fa-history"></i><span>Historial de Cotizaciones</span></a><a class="nav-link" href="{% url 'mantencion_planchas_form' %}"><i class="fas fa-cog"></i><span>Mantención de Planchas</span></a><a class="nav-link active" href="{% url 'mantencion_parametros_form' %}"><i class="fas fa-cog"></i><span>Mantención de Parámetros</span></a><a class="nav-link" href="login.html"><i class="fas fa-external-link-alt"></i><span>Salir</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="register.html"><i class="fas fa-th-list"></i><span>Cotizaciones Pendientes</span></a><a class="nav-link" href="profile.html"><i class="fas fa-history"></i><span>Historial de Cotizaciones</span></a><a class="nav-link active" href="{% url 'mantencion_planchas_form' %}"><i class="fas fa-cog"></i><span>Mantención de Planchas</span></a><a class="nav-link" href="{% url 'mantencion_parametros_form' %}"><i class="fas fa-cog"></i><span>Mantención de Parámetros</span></a><a class="nav-link" href="login.html"><i class="fas fa-external-link-alt"></i><span>Salir</span></a></li>
         </ul>
         <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button></div>
     </div>
 </nav>
-{% endblock %}
-
-
-{% block nav_light %}
-
 {% endblock %}
 
 {% block section %}
@@ -57,7 +52,7 @@
 
 <div class="container mt-4">
     <div class="center-form">
-        <h2 class="mb-4">Editar Parámetro</h2>
+        <h2 class="mb-4">Ingreso de Planchas</h2>
         <form method="post" action="">
             {% csrf_token %}
             {% for field in form %}
@@ -75,13 +70,9 @@
             </div>
             {% endfor %}
             <div class="button-container">
-                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                <button type="submit" class="btn btn-success">Crear</button>
             </div>
         </form>
     </div>
 </div>
 {% endblock %}
-
-
-
-
