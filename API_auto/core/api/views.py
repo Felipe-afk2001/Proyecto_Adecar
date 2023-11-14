@@ -9,7 +9,8 @@ from django.http import HttpResponse
 from django.core.mail import EmailMessage
 from datetime import datetime, timedelta
 from django.utils import timezone
-
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors 
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
@@ -57,7 +58,9 @@ def calcular_manual(request):
             # Calculos (todos los calculos redondeados)
                 #calculo area caja
             largo_maximo_caja = largo1 + largo2 + largo3 + largo4 + 40
+            largo_maximo_caja = math.ceil(largo_maximo_caja)
             alto_max_caja  = alto1 + (alto2 * 2)
+            alto_max_caja = math.ceil(alto_max_caja)
             area_caja = largo_maximo_caja * alto_max_caja
             area_caja = math.ceil(area_caja)  
 
@@ -66,8 +69,8 @@ def calcular_manual(request):
             area_total_plancha = math.ceil(area_total_plancha)  
 
                 #calculo exedentes
-            exedente_vertical = ancho_plancha - alto_max_caja
-            exedente_horizontal = largo_plancha - largo_maximo_caja # CAMBIE EL ORDEN PORQUE EL ALTO SE RESTABA AL LARGO. HAY QUE VERLA PORQUE NO CONTEMPLA LAS CANTIDADES POR HOJA, TOMA UN EXCEDENTE POR SOLO UNA DENTRO DE LA PLANCHA
+            exedente_vertical = ancho_plancha - largo_maximo_caja
+            exedente_horizontal = largo_plancha - alto_max_caja 
 
                 #calculo de cantidad de planchas
             dif_largo = largo_plancha / largo_maximo_caja
@@ -83,7 +86,7 @@ def calcular_manual(request):
                 cantidad_plancha = math.ceil(cantidad_plancha)
 
                 #calculo costo de la materia prima
-            coste_materia_prima = (precio_plancha / cantidad_plancha) #PIPE TE LO CAMBIE POR DIVISION, DABA MAS DEL PRECIO DE PLANCHA. ESTABA CANTIDAD PLANCHA x PRECIO PLANCHA
+            coste_materia_prima = (precio_plancha * cantidad_plancha) 
             coste_materia_prima = math.ceil(coste_materia_prima)  
 
                 #calculo de precio de caja unitaria
@@ -368,62 +371,97 @@ def calcular_auto(request):
             fecha_vencimiento = fecha_vencimiento.strftime('%d-%m-%Y')
             fecha_actual = fecha_actual.strftime('%d-%m-%Y')
 
+            # Generar PDF
             response = HttpResponse(content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="cotizacion.pdf"'
-            # Crear el objeto PDF, usando el objeto HttpResponse como "buffer".
-            p = canvas.Canvas(response)
+            response['Content-Disposition'] = f'attachment; filename="cotizacion_{id_solicitud}.pdf"'
+            p = canvas.Canvas(response, pagesize=letter)
 
-             # Generar PDF
-            response = HttpResponse(content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="cotizacion.pdf"'
-            p = canvas.Canvas(response)
-
-            # Agregar contenido al PDF
-
-            margen_top = 950
-            margen_titulo = 800
-            margen_cliente = 850
-
-            contenido_pdf = [
-                'Medidas Solicitadas',
-                f"Largo Caja: {data.get('largo_caja', 0)}",
-                f"Ancho Caja: {data.get('ancho_caja', 0)} ",
-                f"Alto Caja: {data.get('alto_caja', 0)}",
-                f'',
-                f'Medidas Calculadas',
-                f'Largo total de la caja: {largo_maximo_caja}',
-                f'Alto total de la caja: {alto_max_caja}',
-                f'Area total de la caja: {area_caja}',
-                f'',
-                f'Detalle Cotizacion'
-                f'Tipo de plancha: {id_tipo_plancha}'
-                f'Area total de la plancha: {area_total_plancha}',
-                f'Cantidad de cajas solicitadas: {cantidad_caja}',
-                f'Cantidad de planchas solicitadas: {cantidad_plancha}',
-                f'Costos por la cantidad de planchas: {coste_materia_prima}',
-                f'Porcentaje de benedicio empresa: {porcentaje_utilidad}',
-                f'Costo de creacion de una caja: {coste_creacion}',
-                f'Precio Unitario por Caja:{precio_caja}',
-                f'Precio Total por Cajas: {precio_total}'
-            ]
-            contenido_cliente = [
-                'Procesado para',
-                f'Cliente: {nombre_cliente}',
-                f'Correo: {correo_cliente}',
-                f'Rut: {rut_cliente}'
-            ]
-
-            p.drawString(80, margen_titulo, f'Cotizacion N° {id_solicitud}')
-
-            p.drawString(20, (margen_titulo), 'Adecar')
+            # Configuraciones de estilo
+            p.setFont("Helvetica-Bold", 20)
+            p.drawString(50, 750, "Adecar")  # Logo o nombre de la empresa
+            p.setFont("Helvetica", 16)
+            p.drawString(50, 730, f'Cotización N° {id_solicitud}')
             
-            for linea in contenido_cliente:
-                p.drawString(80, margen_cliente, linea)
-                margen_cliente -= 20
+            # Datos del cliente
+            altura_cliente = 700  # Iniciar la altura para los detalles del cliente
+            p.setFont("Helvetica", 12)
+            p.drawString(50, altura_cliente, f'Cliente: {nombre_cliente}')
+            p.drawString(50, altura_cliente - 15, f'Correo: {correo_cliente}')
+            p.drawString(50, altura_cliente - 30, f'Rut: {rut_cliente}')
+            p.drawString(50, altura_cliente - 45, f'Comentario: {comentario}')
 
-            for linea in contenido_pdf:
-                p.drawString(100, margen_top, linea)
-                margen_top -= 20
+            # Línea de separación
+            p.setStrokeColor(colors.black)
+            p.line(50, altura_cliente - 60, 550, altura_cliente - 60)
+
+            # Detalles de la cotización
+            altura_detalle = altura_cliente - 80  # Iniciar la altura para los detalles de la cotización
+            
+            # Medidas Solicitadas
+            altura_detalle -= 20
+            p.setFont("Helvetica-Bold", 16)
+            p.drawString(50, altura_detalle, 'Medidas Solicitadas')
+            altura_detalle -= 20
+            p.setFont("Helvetica", 12)
+            p.drawString(50, altura_detalle, f'Largo Caja: {data.get("largo_caja", 0)}')
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f"Ancho Caja: {data.get('ancho_caja', 0)} ")
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f"Alto Caja: {data.get('alto_caja', 0)}")
+            altura_detalle -= 30
+            
+            # Medidas en Plano
+            p.setFont("Helvetica-Bold", 16)
+            p.drawString(50, altura_detalle, 'Medidas en Plano')
+            altura_detalle -= 20
+            p.setFont("Helvetica", 12)
+            p.drawString(50, altura_detalle, f'Largo total de la caja: {largo_maximo_caja}')
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f'Alto total de la caja: {alto_max_caja}')
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f'Area total de la caja: {area_caja}')
+            altura_detalle -= 30
+
+            # Plancha Utilizada
+            p.setFont("Helvetica-Bold", 16)
+            p.drawString(50, altura_detalle, 'Plancha Utilizada')
+            altura_detalle -= 20
+            p.setFont("Helvetica", 12)
+            p.drawString(50, altura_detalle, f'Tipo de plancha: {id_tipo_plancha}',)
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f'Area total de la plancha: {area_total_plancha}',)
+            altura_detalle -= 30
+
+            # Costos
+            p.setFont("Helvetica-Bold", 16)
+            p.drawString(50, altura_detalle, 'Costos')
+            altura_detalle -= 20
+            p.setFont("Helvetica", 12)
+            p.drawString(50, altura_detalle, f'Cantidad de cajas solicitadas: {cantidad_caja}',)
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f'Cantidad de planchas necesitadas: {cantidad_plancha}',)
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f'Costos por la cantidad de planchas: {coste_materia_prima}',)
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f'Porcentaje de venta: {porcentaje_utilidad}',)
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f'Costo de fabricacion: {coste_creacion}',)
+            altura_detalle -= 30
+
+            # Precios Finales
+            p.setFont("Helvetica-Bold", 16)
+            p.drawString(50, altura_detalle, 'Precios Finales')
+            altura_detalle -= 20
+            p.setFont("Helvetica", 12)
+            p.drawString(50, altura_detalle, f'Precio Unitario por Caja: {precio_caja}')
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f'Precio Total por Cajas: {precio_total}')
+            altura_detalle -= 25
+
+            #linea final
+            p.setStrokeColor(colors.black)
+            p.line(50, altura_detalle - 10, 550, altura_detalle - 10)
+
 
             # Cierra el objeto PDF y devuelve la respuesta
             p.showPage()
