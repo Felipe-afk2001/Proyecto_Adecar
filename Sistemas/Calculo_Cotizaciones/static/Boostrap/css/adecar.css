@@ -22,3 +22,9 @@ body {
     resize: vertical;  /* Permitir ajustar el tamaño verticalmente */
     /* Otros estilos como padding, bordes, etc. */
 }
+
+
+.dashboard {
+    min-height: 500px;
+}
+

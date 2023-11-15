@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es-cl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Adecar - Cálculo y Cotizaciones</title>
+    <link rel="stylesheet" href="{% static 'Boostrap\css\bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'Boostrap\css\adecar.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
+    <link rel="stylesheet" href="{% static 'fonts/fontawesome-all.min.css' %}">
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                <nav class="navbar navbar-light navbar-expand bg-white shadow mb-4 topbar static-top">
+                    {% block nav_light %}{% endblock %}
+                </nav>
+                <section class="position-relative py-4 py-xl-5">
+                    {% block section %}{% endblock %}
+                    {% block main %}{% endblock %}
+                </section>
+            </div>
+            <footer class="bg-white sticky-footer">
+                {% block footer %}{% endblock %}
+            </footer>
+        </div>
+    </div>
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/theme.js' %}"></script>
+</body>
+
+</html>
