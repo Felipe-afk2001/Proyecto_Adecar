@@ -70,33 +70,30 @@ def calcular_manual(request):
             area_total_plancha = largo_plancha * ancho_plancha
             area_total_plancha = math.ceil(area_total_plancha)  
 
-                #calculo exedentes
-            exedente_vertical = ancho_plancha - largo_maximo_caja
-            exedente_horizontal = largo_plancha - alto_max_caja 
-
                 #calculo de cantidad de planchas
             dif_largo = largo_plancha / largo_maximo_caja
-            dif_largo = math.ceil(dif_largo)
+            dif_largo = int(dif_largo)
             dif_alto = ancho_plancha / alto_max_caja
-            dif_alto = math.ceil(dif_alto)
+            dif_alto = int(dif_alto)
 
             cantidad_plancha = cantidad_caja
             cantidad_plancha = math.ceil(cantidad_plancha)
 
             if dif_largo >= 2 or dif_alto >= 2:
-                cantidad_plancha = dif_alto + dif_largo
+                caja_x_planchas = dif_alto + dif_largo
+                cantidad_plancha = cantidad_caja/caja_x_planchas
                 cantidad_plancha = math.ceil(cantidad_plancha)
 
                 #calculo costo de la materia prima
-            coste_materia_prima = (precio_plancha * cantidad_plancha) 
+            coste_materia_prima = (cantidad_plancha * precio_plancha)
             coste_materia_prima = math.ceil(coste_materia_prima)  
 
                 #calculo de precio de caja unitaria
-            precio_caja = (coste_creacion + coste_materia_prima) 
+            precio_caja = (coste_creacion) 
             precio_caja = math.ceil(precio_caja)  
 
                 #calculo de precio de total de cajas
-            precio_total = precio_caja * cantidad_caja
+            precio_total = (precio_caja * cantidad_caja) + coste_materia_prima
             precio_total = math.ceil(precio_total)
 
                 #calculo fecha de vencimiento
