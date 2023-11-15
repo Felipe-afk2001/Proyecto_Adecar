@@ -28,24 +28,24 @@ app = DjangoDash('HistorialDashboards')
 
 # Configurar los gráficos y el layout de la aplicación Dash
 app.layout = html.Div([
-    html.H1('Dashboards de Historial de Cotizaciones'),
-
-    dcc.Graph(
-        id='cotizaciones-por-fecha',
-        figure=px.bar(df_fecha, x='fecha_cotizacion', y='cantidad', title='Cantidad de Cotizaciones por Fecha'),
-        style={'height': '100%', 'width': '100%'}
-    ),
+    html.H1('Dashboards de Cotizaciones Realizadas'),
 
     dcc.Graph(
         id='cotizaciones-por-cliente',
         figure=px.bar(df_cliente, x='nombre_cliente', y='cantidad', title='Cantidad de Cotizaciones por Cliente'),
-        style={'height': '100%', 'width': '100%'}
+        style={'width': '50', 'height': '100'}
     ),
 
     dcc.Graph(
         id='cotizaciones-aceptadas-por-fecha',
         figure=px.bar(df_aceptadas, x='fecha_cotizacion', y='cantidad', title='Cantidad de Cotizaciones Aceptadas por Fecha'),
-        style={'height': '100%', 'width': '100%'} 
+        style={'width': '50', 'height': '100'}
+    ),
+
+    dcc.Graph(
+        id='cotizaciones-por-fecha',
+        figure=px.bar(df_fecha, x='fecha_cotizacion', y='cantidad', title='Cantidad de Cotizaciones por Fecha'),
+        style={'width': '50', 'height': '100'}
     )
 
 ])
