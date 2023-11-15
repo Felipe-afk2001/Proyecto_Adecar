@@ -1,0 +1,24 @@
+body {
+    background-color: #273043; /* Cambia el fondo a #2b2d42 */
+    color: white; /* Establece el color de texto en blanco */
+}
+
+
+.navbar {
+    background-color: #9197ae;
+}
+
+.inicio_sesion {
+    margin-top: 10%;
+    margin-bottom: 20px;
+    margin-left: 5%;
+    margin-right: 5%;
+    position: relative;
+
+}
+
+.form-control {
+    width: 100%;       /* Ocupar todo el ancho disponible */
+    resize: vertical;  /* Permitir ajustar el tamaño verticalmente */
+    /* Otros estilos como padding, bordes, etc. */
+}
