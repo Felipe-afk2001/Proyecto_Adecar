@@ -284,29 +284,30 @@ from django.core.exceptions import ValidationError
 
 def agregar_cliente(request):
     mensaje_error = None
+    mensaje_exito = None
     if request.method == 'POST':
         rut_cliente = request.POST.get('rut_cliente')
         nombre = request.POST.get('nombre')
         apellido = request.POST.get('apellido')
         correo = request.POST.get('correo')
 
-        # Verifica si el RUT ya existe en la base de datos
         if Cliente.objects.filter(rut_cliente=rut_cliente).exists():
             mensaje_error = "El RUT ingresado ya existe en la base de datos."
-
-        if not mensaje_error:
+        else:
             try:
-                # Crear y guardar la nueva instancia de Cliente
                 nuevo_cliente = Cliente(rut_cliente=rut_cliente, nombre=nombre, apellido=apellido, correo=correo)
                 nuevo_cliente.save()
-
-                # Después de agregar el cliente, redirige a donde necesites
-                return redirect('calculo_de_precio')
+                mensaje_exito = "Cliente añadido satisfactoriamente, redirigiendo..."
+                # Aquí, puedes redirigir o manejar el mensaje de éxito como prefieras
             except Exception as e:
                 mensaje_error = f"Error al agregar el cliente: {str(e)}"
 
-    # Si hay un mensaje de error o es una solicitud GET, muestra la plantilla con el mensaje
-    return render(request, 'agregar_cliente.html', {'mensaje_error': mensaje_error})
+    context = {
+        'mensaje_error': mensaje_error,
+        'mensaje_exito': mensaje_exito
+    }
+    return render(request, 'creacion_cliente.html', context)
+
 
 
 """
@@ -318,6 +319,7 @@ def procesar_datos(request):
     mensaje_error = None #inicializador
     if request.method == 'POST':
         rut_cliente = request.POST.get('rut_cliente')
+        request.session['rut_para_crear'] = rut_cliente
         largo = float(request.POST.get('largo'))
         largostr = request.POST.get('largo')
         ancho = float(request.POST.get('ancho'))
