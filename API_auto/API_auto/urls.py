@@ -17,7 +17,7 @@ Including another URLconf
 # myapp/urls.py
 from django.urls import path, include
 from django.contrib import admin
-from core.api.views import calcular_auto, calcular_manual, crear_pdf_manual
+from core.api.views import calcular_auto, calcular_manual, crear_pdf_manual, crear_correo
 
 
 
@@ -26,5 +26,5 @@ urlpatterns = [
     path('calcular_auto/', calcular_auto, name='calcular_auto'),
     path('calcular_manual/', calcular_manual, name='calcular_manual'),
     path('crear_pdf/', crear_pdf_manual, name='crear_pdf_manual'),
-
+    path('crear_correo/', crear_correo, name='crear_correo'),
 ]

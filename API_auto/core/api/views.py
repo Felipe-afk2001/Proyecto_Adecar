@@ -146,6 +146,7 @@ def crear_pdf_manual(request):
         if request.method == 'POST':
             data = request.data
 
+
             # Generar variables
                 #variables cliente
             nombre_cliente = data.get('nombre_cliente', 0)
@@ -158,14 +159,14 @@ def crear_pdf_manual(request):
 
                 #variables caja
             largo_maximo_caja = data.get('largo_maximo_caja')
-            alto_max_caja = data.get('alto_max_caja')
+            alto_max_caja = data.get('alto_maximo_caja')
             area_caja = data.get('area_caja')
-            cantidad_caja = data.get('cantidad_caja', 0)
+            cantidad_caja = data.get('cantidad_cajas', 0)
 
                 #variables plancha
             id_tipo_plancha = data.get('id_tipo_plancha', 0)
             area_total_plancha = data.get('area_total_plancha')
-            cantidad_plancha = data.get('cantidad_plancha')
+            cantidad_plancha = data.get('cantidad_planchas')
 
                 #varibles costos
             coste_creacion = data.get('coste_creacion', 0)
@@ -175,7 +176,151 @@ def crear_pdf_manual(request):
             porcentaje_utilidad = data.get('porcentaje_utilidad')
 
                 #variables fecha 
-            fecha_actual = data.get('fecha_actual')
+            fecha_actual = data.get('fecha_solicitud')
+            
+
+            # Generar PDF
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="cotizacion_{id_solicitud}.pdf"'
+            p = canvas.Canvas(response, pagesize=letter)
+
+            # Configuraciones de estilo
+            p.setFont("Helvetica-Bold", 25)
+            p.drawString(50, 750, "Adecar")  # Logo o nombre de la empresa
+            p.setFont("Helvetica", 16)
+            p.drawString(50, 730, f'Cotización N° {id_solicitud}')
+            p.drawString(200, 730, f'Santiago de Chile, {fecha_actual}')
+            
+            # Datos del cliente
+            altura_cliente = 700  # Iniciar la altura para los detalles del cliente
+            p.setFont("Helvetica", 12)
+            p.drawString(50, altura_cliente, f'Cliente: {nombre_cliente}')
+            p.drawString(50, altura_cliente - 15, f'Correo: {correo_cliente}')
+            p.drawString(50, altura_cliente - 30, f'Rut: {rut_cliente}')
+            p.drawString(50, altura_cliente - 45, f'Comentario: {comentario}')
+
+            # Línea de separación
+            p.setStrokeColor(colors.black)
+            p.line(50, altura_cliente - 60, 550, altura_cliente - 60)
+
+            # Detalles de la cotización
+            altura_detalle = altura_cliente - 80  # Iniciar la altura para los detalles de la cotización
+            
+            # Medidas Solicitadas
+            altura_detalle -= 20
+            p.setFont("Helvetica-Bold", 16)
+            p.drawString(50, altura_detalle, 'Medidas Solicitadas')
+            altura_detalle -= 20
+            p.setFont("Helvetica", 12)
+            p.drawString(50, altura_detalle, f'Largo Caja: {data.get("largo_caja", 0)}')
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f"Ancho Caja: {data.get('ancho_caja', 0)} ")
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f"Alto Caja: {data.get('alto_caja', 0)}")
+            altura_detalle -= 30
+            
+            # Medidas en Plano
+            p.setFont("Helvetica-Bold", 16)
+            p.drawString(50, altura_detalle, 'Medidas en Plano')
+            altura_detalle -= 20
+            p.setFont("Helvetica", 12)
+            p.drawString(50, altura_detalle, f'Largo total de la caja: {largo_maximo_caja}')
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f'Alto total de la caja: {alto_max_caja}')
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f'Area total de la caja: {area_caja}')
+            altura_detalle -= 30
+
+            # Plancha Utilizada
+            p.setFont("Helvetica-Bold", 16)
+            p.drawString(50, altura_detalle, 'Plancha Utilizada')
+            altura_detalle -= 20
+            p.setFont("Helvetica", 12)
+            p.drawString(50, altura_detalle, f'Tipo de plancha: {id_tipo_plancha}',)
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f'Area total de la plancha: {area_total_plancha}',)
+            altura_detalle -= 30
+
+            # Costos
+            p.setFont("Helvetica-Bold", 16)
+            p.drawString(50, altura_detalle, 'Costos')
+            altura_detalle -= 20
+            p.setFont("Helvetica", 12)
+            p.drawString(50, altura_detalle, f'Cantidad de cajas solicitadas: {cantidad_caja}',)
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f'Cantidad de planchas necesitadas: {cantidad_plancha}',)
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f'Costos por la cantidad de planchas: {coste_materia_prima}',)
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f'Porcentaje de venta: {porcentaje_utilidad}',)
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f'Costo de fabricacion: {coste_creacion}',)
+            altura_detalle -= 30
+
+            # Precios Finales
+            p.setFont("Helvetica-Bold", 16)
+            p.drawString(50, altura_detalle, 'Precios Finales')
+            altura_detalle -= 20
+            p.setFont("Helvetica", 12)
+            p.drawString(50, altura_detalle, f'Precio Unitario por Caja: {precio_caja}')
+            altura_detalle -= 15
+            p.drawString(50, altura_detalle, f'Precio Total por Cajas: {precio_total}')
+            altura_detalle -= 25
+
+            #linea final
+            p.setStrokeColor(colors.black)
+            p.line(50, altura_detalle - 10, 550, altura_detalle - 10)
+
+
+            # Cierra el objeto PDF y devuelve la respuesta
+            p.showPage()
+            p.save()
+            return response
+
+        else:
+            return Response({'error': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+
+def crear_correo(request):
+    try:
+        if request.method == 'POST':
+            data = request.data
+
+            # Generar variables
+                #variables cliente
+            nombre_cliente = data.get('nombre_cliente', 0)
+            rut_cliente = data.get('rut_cliente', 0)
+            correo_cliente = data.get('correo_cliente', 0)
+
+                #varibles solicitud
+            id_solicitud = data.get('id_solicitud', 0)
+            comentario = data.get('comentario', 0)
+
+                #variables caja
+            largo_maximo_caja = data.get('largo_maximo_caja')
+            alto_max_caja = data.get('alto_maximo_caja')
+            area_caja = data.get('area_caja')
+            cantidad_caja = data.get('cantidad_cajas', 0)
+
+                #variables plancha
+            id_tipo_plancha = data.get('id_tipo_plancha', 0)
+            area_total_plancha = data.get('area_total_plancha')
+            cantidad_plancha = data.get('cantidad_planchas')
+
+                #varibles costos
+            coste_creacion = data.get('coste_creacion', 0)
+            coste_materia_prima = data.get('coste_materia_prima')  
+            precio_caja = data.get('precio_caja')
+            precio_total = data.get('precio_total')
+            porcentaje_utilidad = data.get('porcentaje_utilidad')
+
+                #variables fecha 
+            fecha_actual = data.get('fecha_solicitud')
             fecha_vencimiento = data.get('fecha_vencimiento')
 
             # Generar PDF
