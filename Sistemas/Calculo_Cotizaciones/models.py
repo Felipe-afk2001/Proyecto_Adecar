@@ -47,6 +47,19 @@ class Solicitud_Cotizacion(models.Model):
     cantidad_caja = models.DecimalField(max_digits=4, decimal_places=0)
     cod_carton = models.CharField(max_length=5)
     comentario = models.CharField(max_length=400)
+
+    @property
+    def nombre_cliente(self):
+        return self.rut_cliente.nombre
+
+    @property
+    def apellido_cliente(self):
+        return self.rut_cliente.apellido
+
+    @property
+    def correo_cliente(self):
+        return self.rut_cliente.correo
+
     def save(self, *args, **kwargs):
         if not self.id_cotizacion:
             self.id_cotizacion = self.generate_id()
