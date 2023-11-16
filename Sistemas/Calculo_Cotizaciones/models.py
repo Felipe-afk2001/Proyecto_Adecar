@@ -1,4 +1,6 @@
 from django.db import models
+import string
+import itertools
 
 # class Usuario(models.Model):
 #     id_usuario = models.CharField(max_length=100, primary_key=True)
@@ -45,6 +47,21 @@ class Solicitud_Cotizacion(models.Model):
     cantidad_caja = models.DecimalField(max_digits=4, decimal_places=0)
     cod_carton = models.CharField(max_length=5)
     comentario = models.CharField(max_length=400)
+    def save(self, *args, **kwargs):
+        if not self.id_cotizacion:
+            self.id_cotizacion = self.generate_id()
+        super().save(*args, **kwargs)
+
+    @staticmethod
+    def generate_id():
+        prefix = 'M'
+        largest_id = Solicitud_Cotizacion.objects.all().order_by('-id_cotizacion').first()
+        if largest_id:
+            num = int(largest_id.id_cotizacion.lstrip(prefix)) + 1
+        else:
+            num = 1
+        return f'{prefix}{num}'
+
     class Meta:
         db_table = 'Solicitud_Cotizacion'
 
