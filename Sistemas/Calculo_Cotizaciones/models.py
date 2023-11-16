@@ -33,10 +33,6 @@ class Cliente(models.Model):
     nombre = models.CharField(max_length=50)
     apellido = models.CharField(max_length=50)
     correo = models.CharField(max_length=255)
-    telefono = models.DecimalField(max_digits=9, decimal_places=0)
-    id_tipo_cliente = models.ForeignKey(Tipo_Cliente, on_delete=models.CASCADE)
-    direccion = models.CharField(max_length=50)
-    contrasenia = models.CharField(max_length=16)
     class Meta:
         db_table = 'Cliente'
 
