@@ -33,6 +33,13 @@
         var ancho = parseFloat(document.getElementById('ancho').value);
         var alto = parseFloat(document.getElementById('alto').value);
         var tipoCarton = document.querySelector('select[name="tipo_carton"]').value;
+        var rut = document.getElementById('rut_cliente').value;
+        var regexRut = /^[0-9]{7,8}-[0-9Kk]$/;
+
+        if (!regexRut.test(rut)) {
+            alert('Por favor, ingrese el RUT en el formato correcto (00000000-0).');
+            return false;
+        }
 
         if (largo <= 0 || ancho <= 0 || alto <= 0) {
             alert('Las medidas deben ser mayores que 0.');
