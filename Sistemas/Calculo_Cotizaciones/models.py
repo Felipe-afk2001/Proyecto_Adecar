@@ -47,6 +47,7 @@ class Solicitud_Cotizacion(models.Model):
     cantidad_caja = models.DecimalField(max_digits=4, decimal_places=0)
     cod_carton = models.CharField(max_length=5)
     comentario = models.CharField(max_length=400)
+    estado = models.CharField(max_length=50, default='Pendiente')
 
     @property
     def nombre_cliente(self):
