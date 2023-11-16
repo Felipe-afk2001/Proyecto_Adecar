@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 import string
 import itertools
 
@@ -48,6 +49,7 @@ class Solicitud_Cotizacion(models.Model):
     cod_carton = models.CharField(max_length=5)
     comentario = models.CharField(max_length=400)
     estado = models.CharField(max_length=50, default='Pendiente')
+    fecha_cotizacion = models.DateTimeField(auto_now_add=True)
 
     @property
     def nombre_cliente(self):
