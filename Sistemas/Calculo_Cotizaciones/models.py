@@ -29,7 +29,7 @@ class Tipo_Cliente(models.Model):
         db_table = 'Tipo_Cliente'
 
 class Cliente(models.Model):
-    id_cliente = models.CharField(max_length=100, primary_key=True)
+    rut_cliente = models.CharField(max_length=100, primary_key=True)
     nombre = models.CharField(max_length=50)
     apellido = models.CharField(max_length=50)
     correo = models.CharField(max_length=255)
