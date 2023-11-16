@@ -74,13 +74,7 @@
                     <form method="post" action="{% url 'procesar_datos' %}" onsubmit="return validarFormulario()">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <input class="form-control" type="text" id="nombre_cliente" name="nombre_cliente" placeholder="Nombre de cliente" step="any" required maxlength="50">
-                        </div>
-                        <div class="mb-3">
-                            <input class="form-control" type="text" id="apellido_cliente" name="apellido_cliente" placeholder="Apellido de cliente" step="any" required maxlength="50">
-                        </div>
-                        <div class="mb-3">
-                            <input class="form-control" type="email" id="correo_cliente" name="correo_cliente" placeholder="Correo electrónico" step="any" required maxlength="255">
+                            <input class="form-control" type="text" id="rut_cliente" name="rut_cliente" placeholder="RUT Cliente (Sin puntos y con guión)" step="any" required maxlength="10">
                         </div>
                         <div class="mb-3">
                             <input class="form-control" type="number" id="largo" name="largo" placeholder="Largo (mm)" min="0" step="any" required maxlength="10">

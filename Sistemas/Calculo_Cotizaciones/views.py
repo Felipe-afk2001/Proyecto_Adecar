@@ -299,8 +299,8 @@ def procesar_datos(request):
         altostr = request.POST.get('alto')
         cantidad = int(request.POST.get('cantidad_cajas'))
         tipo_carton = request.POST.get('tipo_carton').upper()
-        nombre_cliente = request.POST.get('nombre_cliente')
-        apellido_cliente = request.POST.get('apellido_cliente')
+        rut_cliente = request.POST.get('rut_cliente')
+        
 
         """
         Calcula largo de hoja
