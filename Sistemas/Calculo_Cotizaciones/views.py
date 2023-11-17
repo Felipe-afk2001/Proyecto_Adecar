@@ -278,10 +278,8 @@ VISTAS DE COTIZACIÓN MANUAL
 #         # Manejar otros métodos o devolver un error
 #         pass
 def cotizacion_manual (request):
-    if request.user.perfil == 'admin':
         return render(request, 'cotizacion_manual.html')
-    else:
-        return HttpResponse("No tiene acceso a esta página.")
+
 def calculo_de_precio(request):
     return render(request, 'calculo_de_precio.html')
 
@@ -480,8 +478,6 @@ def procesar_datos(request):
             api_largo_plancha = resultado_api['largo_plancha']
             api_ancho_plancha = resultado_api['ancho_plancha']
             api_area_total_plancha = resultado_api['area_total_plancha']
-            api_exedente_horizontal = resultado_api['exedente_horizontal']
-            api_exedente_vertical = resultado_api['exedente_vertical']
             api_dif_largo = resultado_api['dif_largo']
             api_dif_alto = resultado_api['dif_alto']
             api_precio_plancha = resultado_api['precio_plancha']
@@ -539,8 +535,8 @@ def procesar_datos(request):
                                                           'media_hm_str':media_hm_str,
                                                           'plancha_necesaria':plancha_seleccionada,
                                                           'api_area_total_plancha':api_area_total_plancha, #API
-                                                          'excedente_vertical':api_exedente_vertical, #API VER
-                                                          'excedente_horizontal':api_exedente_horizontal, #API VER
+                                                          'excedente_vertical':excedente_vertical, #API VER
+                                                          'excedente_horizontal':excedente_horizontal, #API VER
                                                           'total_cajas_por_plancha': api_cantidad_x_plancha, #API
                                                           'costo_ex_vertical':round(costo_ex_vertical),
                                                           'costo_ex_horizontal':round(costo_ex_horizontal),
