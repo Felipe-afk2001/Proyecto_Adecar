@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from Calculo_Cotizaciones.models import Parametro #Para hacer las validaciones de los parámetros
 from django.http import JsonResponse, HttpResponse
 from Calculo_Cotizaciones.models import Tipo_Plancha, Historial, Cliente
@@ -14,16 +14,24 @@ import requests
 import math
 from .forms import ParametroForm, PlanchaForm
 import os
+from .models import Usuario
 
-def login_view(request):
+def custom_login_view(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request, request.POST)
-        if form.is_valid():
-            login(request, form.get_user())
+        username = request.POST['username']
+        password = request.POST['password']
+        
+        # Personaliza esta parte según tu modelo de usuario
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
             return redirect('home')  # Redirige a la vista de inicio después del inicio de sesión
-    else:
-        form = AuthenticationForm()
-    return render(request, 'login.html', {'form': form})
+        else:
+            # Maneja el caso en el que la autenticación falla
+            return render(request, 'login.html', {'error_message': 'Credenciales inválidas'})
+
+    return render(request, 'login.html')
 
 @login_required
 def home (request):
@@ -270,8 +278,10 @@ VISTAS DE COTIZACIÓN MANUAL
 #         # Manejar otros métodos o devolver un error
 #         pass
 def cotizacion_manual (request):
-    return render(request, 'cotizacion_manual.html')
-
+    if request.user.perfil == 'admin':
+        return render(request, 'cotizacion_manual.html')
+    else:
+        return HttpResponse("No tiene acceso a esta página.")
 def calculo_de_precio(request):
     return render(request, 'calculo_de_precio.html')
 
