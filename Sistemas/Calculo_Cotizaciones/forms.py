@@ -1,5 +1,12 @@
 from django import forms
 from .models import Parametro, Tipo_Plancha
+from django.contrib.auth.forms import AuthenticationForm
+from .models import Usuario  # Asegúrate de importar tu modelo de usuario personalizado
+
+class CustomAuthenticationForm(AuthenticationForm):
+    class Meta:
+        model = Usuario  # Especifica el modelo de usuario personalizado
+        fields = ['username', 'password']  # Los campos que deseas incluir en el formulario
 
 class CotizacionForm(forms.Form):
     id_cotizacion = forms.IntegerField()
