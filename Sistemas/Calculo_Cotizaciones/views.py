@@ -184,7 +184,7 @@ def mantencion_parametros_form(request):
     return render(request, 'mantencion_parametros_form.html', {'form': form, 'parametros': todos_los_parametros})
 
 """
-API Cálculo (No PDF)
+API Cálculo Manual
 """
 def enviar_solicitud_api(largo, ancho, alto, largo_plancha, ancho_plancha, coste_materia, cantidad):
     # URL de tu API
@@ -218,6 +218,75 @@ def enviar_solicitud_api(largo, ancho, alto, largo_plancha, ancho_plancha, coste
     except requests.exceptions.RequestException as e:
         print(f"Ocurrió un error al hacer la solicitud: {e}")
         return None
+
+"""
+API PDF Manual
+"""
+import requests
+
+def solicitud_pdf():
+    
+    datos_procesar = request.session.get('datos_procesar', {})
+
+    nombre_cliente = datos_procesar.get('nombre_cliente', '')
+    rut_cliente = datos_procesar.get('rut_cliente')
+    correo_cliente = datos_procesar.get('') #PENDIENTE traer con otro sesion
+    id_solicitud = datos_procesar.get('') #PENDIENTE traer con otro sesion
+    alto_max_caja = datos_procesar.get('ancho_hm')
+    area_caja = datos_procesar.get('api_area_caja')
+    cantidad_cajas = datos_procesar.get('api_cantidad_cajas')
+    id_tipo_plancha = datos_procesar.get('tipo_carton')
+    area_total_plancha = datos_procesar.get('api_area_total_plancha')
+    candidad_planchas = datos_procesar.get('') #PENDIENTE PUEDE ESTAR EN API 1
+    coste_creacion = 50
+    coste_materia_prima = datos_procesar.get('api_precio_plancha')
+    precio_caja = datos_procesar.get('costo_por_unidad')
+    precio_total = datos_procesar.get('') #PENDIENTE traer con otro session
+    porcentaje_utilidad = datos_procesar.get('') #PENDIENTE tra..
+    fecha_solicitud = datos_procesar.get('') #PENDIENTE tra...
+    
+    # URL de tu API
+    url = 'http://localhost:8000/crear_pdf_manual/'
+    token = '95f397a7bce2f2ffbe6c404caa1994ae991c4ee5'  # Token de autenticación
+
+    headers = {'Authorization': f'Token {token}'}
+
+    # Datos para enviar en la petición POST
+    datos_pdf = {
+        'nombre_cliente': nombre_cliente,
+        'rut_cliente': rut_cliente,
+        'correo_cliente': correo_cliente,
+        'id_solicitud': id_solicitud,
+        'alto_max_caja': alto_max_caja,
+        'area_caja': area_caja,
+        'cantidad_cajas': cantidad_cajas,
+        'id_tipo_plancha': id_tipo_plancha,
+        'area_total_plancha': area_total_plancha,
+        'cantidad_planchas': cantidad_planchas,
+        'coste_creacion': coste_creacion,
+        'coste_materia_prima': coste_materia_prima,
+        'precio_caja': precio_caja,
+        'precio_total': precio_total,
+        'porcentaje_utilidad': porcentaje_utilidad,
+        'fecha_solicitud': fecha_solicitud,
+    }
+
+    try:
+        # Realizar la petición POST
+        respuesta = requests.post(url, json=datos_pdf, headers=headers)
+        
+        if respuesta.status_code == 200:
+            # Instanciar el PDF en una variable
+            contenido_pdf = respuesta.content
+            print("PDF instanciado en la variable correctamente.")
+            return contenido_pdf
+        else:
+            print(f"Error en la solicitud: {respuesta.status_code}, Respuesta: {respuesta.text}")
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"Ocurrió un error al hacer la solicitud: {e}")
+        return None
+
 """
 Seleccionar parámetros
 """
@@ -514,6 +583,42 @@ def procesar_datos(request):
         coste_total_plancha = coste_materia - (costo_ex_vertical + costo_ex_horizontal)
         costo_por_unidad = coste_total_plancha / total_cajas_por_plancha
 
+        """
+        Sessions para argumentos de API
+        """
+        datos_procesar = {
+            'rut_cliente': rut_cliente,
+            'api_fecha_solicitud': api_fecha_solicitud,
+            'largo': largo,
+            'ancho': ancho,
+            'alto': alto,
+            'largostr': largostr,
+            'anchostr': anchostr,
+            'altostr': altostr,
+            'cantidad': api_cantidad_cajas,
+            'tipo_carton': tipo_carton,
+            'api_precio_plancha': api_precio_plancha,
+            'largo_hm': largo_hm,
+            'ancho_hm': ancho_hm,
+            'media_hm': media_hm,
+            'largo_hm_str': api_largo_maximo_caja,
+            'ancho_hm_str': api_ancho_maximo_caja,
+            'media_hm_str': media_hm_str,
+            'plancha_necesaria': plancha_seleccionada,
+            'api_area_total_plancha': api_area_total_plancha,
+            'excedente_vertical': excedente_vertical,
+            'excedente_horizontal': excedente_horizontal,
+            'total_cajas_por_plancha': total_cajas_por_plancha,
+            'costo_ex_vertical': round(costo_ex_vertical),
+            'costo_ex_horizontal': round(costo_ex_horizontal),
+            'costo_por_unidad': round(api_precio_caja),
+            'nombre_cliente': nombre_cliente,
+            'apellido_cliente': apellido_cliente,
+            'api_area_caja': api_area_caja,
+            'api_area_total_plancha': api_area_total_plancha
+        }
+
+        request.session['datos_procesar'] = datos_procesar
     if mensaje_error:
         return render(request, 'cotizacion_manual.html', {'mensaje_error': mensaje_error})
     else:
@@ -537,12 +642,15 @@ def procesar_datos(request):
                                                           'api_area_total_plancha':api_area_total_plancha, #API
                                                           'excedente_vertical':excedente_vertical, #API VER
                                                           'excedente_horizontal':excedente_horizontal, #API VER
-                                                          'total_cajas_por_plancha': api_cantidad_x_plancha, #API
+                                                          'total_cajas_por_plancha': total_cajas_por_plancha, #APISALE MAL
                                                           'costo_ex_vertical':round(costo_ex_vertical),
                                                           'costo_ex_horizontal':round(costo_ex_horizontal),
                                                           'costo_por_unidad':round(api_precio_caja),
                                                           'nombre_cliente':nombre_cliente,
-                                                          'apellido_cliente':apellido_cliente}) #API VER     
+                                                          'apellido_cliente':apellido_cliente,
+                                                          'api_area_caja':api_area_caja, #API
+                                                          'api_area_total_plancha':api_area_total_plancha
+                                                          })  
         
     
         # return render(request, 'calculo_de_precio.html',{'largo':largo,

@@ -1,38 +1,50 @@
 import requests
+import io
+import webbrowser
+import tempfile
 
 # URL de tu API
-url = 'http://localhost:8000/calcular/'
+url = 'http://localhost:8001/crear_pdf_manual/'
+token = '95f397a7bce2f2ffbe6c404caa1994ae991c4ee5'  # Token de autenticación
 
-# Token de autenticación (reemplázalo con tu token real)
-token = '95f397a7bce2f2ffbe6c404caa1994ae991c4ee5'
+headers = {'Authorization': f'Token {token}'}
 
-# Cabecera de autenticación
-headers = {
-    'Authorization': f'Token {token}'
+# Datos de prueba
+datos_pdf = {
+    'nombre_cliente': 'Seba',
+    'rut_cliente': '12345678-9',
+    'correo_cliente': 'seba@example.com',
+    'id_solicitud': '1001',
+    'alto_max_caja': 30,
+    'area_caja': 600,
+    'cantidad_cajas': 50,
+    'id_tipo_plancha': 'TP123',
+    'area_total_plancha': 1200,
+    'cantidad_planchas': 10,
+    'coste_creacion': 500,
+    'coste_materia_prima': 2000,
+    'precio_caja': 15,
+    'precio_total': 15000,
+    'porcentaje_utilidad': 20,
+    'fecha_solicitud': '15-11-2023',
 }
 
-# Datos para enviar en la petición POST
-datos_prueba = {
-    'largo_caja': 200,
-    'ancho_caja': 200,
-    'alto_caja': 200,
-    'largo_plancha': 2200,
-    'ancho_plancha': 1620,
-    'coste_materia': 1500,
-    'porcentaje_utilidad': 10,
-    'coste_creacion': 200,
-    'cantidad_caja': 200
-}
+try:
+    respuesta = requests.post(url, json=datos_pdf, headers=headers)
 
-# Realizar la petición POST
-respuesta = requests.post(url, json=datos_prueba, headers=headers)
+    if respuesta.status_code == 200:
+        # Usar io.BytesIO para manejar el contenido del PDF en memoria
+        pdf_en_memoria = io.BytesIO(respuesta.content)
 
-# Verificar la respuesta
-print(f'Estado de la respuesta: {respuesta.status_code}')
-if respuesta.status_code == 200:
-    print("PDF generado exitosamente.")
-    # Aquí puedes manejar el PDF, por ejemplo, guardarlo en un archivo
-    with open('cotizacion.pdf', 'wb') as f:
-        f.write(respuesta.content)
-    import webbrowser
-    webbrowser.open_new('cotizacion.pdf')
+        # Crear un archivo temporal para el PDF
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
+            temp_pdf.write(pdf_en_memoria.getvalue())
+
+        # Abrir el PDF con el navegador web predeterminado
+        webbrowser.open_new(temp_pdf.name)
+        print("PDF abierto en el navegador.")
+    else:
+        print(f"Error en la solicitud: {respuesta.status_code}, Respuesta: {respuesta.text}")
+
+except requests.exceptions.RequestException as e:
+    print(f"Ocurrió un error al hacer la solicitud: {e}")
