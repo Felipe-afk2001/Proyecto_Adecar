@@ -96,34 +96,36 @@
                         </div>
                     </div>
                     <div class="col">
-                        <div class="row">
-                            <div class="col">
-                                <div class="input-group mb-3">
-                                    <input type="number" class="form-control" id="porcentaje" placeholder="Ingresa el porcentaje">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">%</span>
+                        <!-- Aquí empieza el formulario -->
+                        <form method="POST" action="{% url 'generar_cotizacion' %}" id="form_cotizacion">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col">
+                                    <div class="input-group mb-3">
+                                        <input type="number" class="form-control" name="porcentaje" id="porcentaje" placeholder="Ingresa el porcentaje" min="0" maxlength="3">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">%</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="input-group mb-3">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">$</span>
+                                    <div id="error_message" style="color: red; display: none;">Debe ingresar un porcentaje válido antes de continuar</div>
+                                    <div class="input-group mb-3">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">$</span>
+                                        </div>
+                                        <input type="text" class="form-control" id="monto_total" placeholder="Monto total por unidad" disabled>
                                     </div>
-                                    <input type="number" class="form-control" id="precio_final" placeholder="Precio final" disabled>
+                                    <input type="hidden" name="precio_final" id="hidden_precio_final">
                                 </div>
                             </div>
-                        </div>
-                        <div style="text-align: center;">
-                            <button type="button" class="btn btn-primary btn-sm">Generar cotización</button>
-                        </div>
+                            <div style="text-align: center;">
+                                <button type="submit" class="btn btn-primary btn-sm">Generar cotización</button>
+                            </div>
+                        </form>
+                        <!-- Aquí termina el formulario -->
                     </div>
                 </div>
             </div>
         </div>
-        <footer class="bg-white sticky-footer">
-            <div class="container my-auto">
-                <div class="text-center my-auto copyright"><span>Copyright © Adecar - Cálculo y Cotizaciones 2023</span></div>
-            </div>
-        </footer>
     </div>
 </div>
 
@@ -144,21 +146,37 @@
 
 {% block js %}
 <script>
-    document.getElementById('porcentaje').addEventListener('input', function() {
-        var porcentaje = this.value;
-        
-        // Validación para asegurar que sea un número positivo y no más de 4 dígitos
-        if (porcentaje < 0 || porcentaje.length > 4) {
-            alert("Por favor, ingresa un número positivo de no más de 4 dígitos.");
-            this.value = ''; // Limpiar el campo de porcentaje
-            document.getElementById('precio_final').value = '';
-            return; // Salir de la función si la validación falla
-        }
+document.getElementById('form_cotizacion').addEventListener('submit', function(event) {
+    var porcentaje = document.getElementById('porcentaje').value;
+    var errorDiv = document.getElementById('error_message');
 
-        porcentaje = parseFloat(porcentaje);
-        var precioBase = {{ costo_por_unidad }}; // Esto lo pasas desde Django
-        var precioFinal = precioBase + (precioBase * (porcentaje / 100));
-        document.getElementById('precio_final').value = precioFinal.toFixed(2);
-    });
+    // Validar que el porcentaje sea un número entre 0 y 999
+    if (porcentaje < 0 || porcentaje > 999 || porcentaje === '') {
+        errorDiv.style.display = 'block'; // Mostrar el mensaje de error
+        event.preventDefault(); // Prevenir el envío del formulario
+    } else {
+        errorDiv.style.display = 'none'; // Ocultar el mensaje de error
+    }
+});
+
+document.getElementById('porcentaje').addEventListener('input', function() {
+    var porcentaje = this.value;
+    var errorDiv = document.getElementById('error_message');
+    
+    if (porcentaje < 0 || porcentaje > 999 || porcentaje === '') {
+        errorDiv.style.display = 'block';
+        document.getElementById('hidden_precio_final').value = '';
+        document.getElementById('monto_total').value = '';
+        return;
+    } else {
+        errorDiv.style.display = 'none';
+    }
+
+    porcentaje = parseFloat(porcentaje);
+    var precioBase = {{ costo_por_unidad }};
+    var precioFinal = precioBase + (precioBase * (porcentaje / 100));
+    document.getElementById('hidden_precio_final').value = precioFinal.toFixed(2);
+    document.getElementById('monto_total').value = precioFinal.toFixed(2);
+});
 </script>
 {% endblock %}

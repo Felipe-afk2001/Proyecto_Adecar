@@ -6,7 +6,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth import login, authenticate
 from Calculo_Cotizaciones.models import Parametro #Para hacer las validaciones de los parámetros
 from django.http import JsonResponse, HttpResponse
-from Calculo_Cotizaciones.models import Tipo_Plancha, Historial, Cliente
+from Calculo_Cotizaciones.models import Tipo_Plancha, Historial, Cliente, Solicitud_Cotizacion
 from django.db import connection
 from django.core.paginator import Paginator
 import Calculo_Cotizaciones.dash_apps
@@ -222,63 +222,51 @@ def enviar_solicitud_api(largo, ancho, alto, largo_plancha, ancho_plancha, coste
 """
 API PDF Manual
 """
-import requests
 
-def solicitud_pdf():
-    
-    datos_procesar = request.session.get('datos_procesar', {})
-
-    nombre_cliente = datos_procesar.get('nombre_cliente', '')
-    rut_cliente = datos_procesar.get('rut_cliente')
-    correo_cliente = datos_procesar.get('') #PENDIENTE traer con otro sesion
-    id_solicitud = datos_procesar.get('') #PENDIENTE traer con otro sesion
-    alto_max_caja = datos_procesar.get('ancho_hm')
-    area_caja = datos_procesar.get('api_area_caja')
-    cantidad_cajas = datos_procesar.get('api_cantidad_cajas')
-    id_tipo_plancha = datos_procesar.get('tipo_carton')
-    area_total_plancha = datos_procesar.get('api_area_total_plancha')
-    candidad_planchas = datos_procesar.get('') #PENDIENTE PUEDE ESTAR EN API 1
-    coste_creacion = 50
-    coste_materia_prima = datos_procesar.get('api_precio_plancha')
-    precio_caja = datos_procesar.get('costo_por_unidad')
-    precio_total = datos_procesar.get('') #PENDIENTE traer con otro session
-    porcentaje_utilidad = datos_procesar.get('') #PENDIENTE tra..
-    fecha_solicitud = datos_procesar.get('') #PENDIENTE tra...
-    
-    # URL de tu API
-    url = 'http://localhost:8000/crear_pdf_manual/'
-    token = '95f397a7bce2f2ffbe6c404caa1994ae991c4ee5'  # Token de autenticación
-
-    headers = {'Authorization': f'Token {token}'}
-
-    # Datos para enviar en la petición POST
-    datos_pdf = {
-        'nombre_cliente': nombre_cliente,
-        'rut_cliente': rut_cliente,
-        'correo_cliente': correo_cliente,
-        'id_solicitud': id_solicitud,
-        'alto_max_caja': alto_max_caja,
-        'area_caja': area_caja,
-        'cantidad_cajas': cantidad_cajas,
-        'id_tipo_plancha': id_tipo_plancha,
-        'area_total_plancha': area_total_plancha,
-        'cantidad_planchas': cantidad_planchas,
-        'coste_creacion': coste_creacion,
-        'coste_materia_prima': coste_materia_prima,
-        'precio_caja': precio_caja,
-        'precio_total': precio_total,
-        'porcentaje_utilidad': porcentaje_utilidad,
-        'fecha_solicitud': fecha_solicitud,
-    }
-
+def solicitud_pdf(request, id_solicitud):
     try:
+        # Obtener datos desde la sesión
+        datos_procesar = request.session.get('datos_procesar', {})
+        datos_calculo_precio = request.session.get('datos_calculo_precio', {})
+
+        # Asegurarse de obtener el cliente y su correo
+        rut_cliente = datos_procesar.get('rut_cliente', '')
+        try:
+            cliente = Cliente.objects.get(rut_cliente=rut_cliente)
+            correo_cliente = cliente.correo
+        except Cliente.DoesNotExist:
+            correo_cliente = ''
+
+        # Datos que se enviarán en la petición a la API
+        datos_pdf = {
+            'nombre_cliente': datos_procesar.get('nombre_cliente', ''),
+            'rut_cliente': rut_cliente,
+            'correo_cliente': correo_cliente,
+            'id_solicitud': id_solicitud,  # ID de la solicitud recién creada
+            'alto_max_caja': datos_procesar.get('ancho_hm', ''),
+            'area_caja': datos_procesar.get('api_area_caja', ''),
+            'cantidad_cajas': datos_procesar.get('api_cantidad_cajas', ''),
+            'id_tipo_plancha': datos_procesar.get('tipo_carton', ''),
+            'area_total_plancha': datos_procesar.get('api_area_total_plancha', ''),
+            'coste_creacion': 50,
+            'coste_materia_prima': datos_procesar.get('api_precio_plancha', ''),
+            'precio_caja': datos_procesar.get('costo_por_unidad', ''),
+            'precio_total': datos_calculo_precio.get('precio_total'),
+            'porcentaje_utilidad': datos_calculo_precio.get('porcentaje'),
+            'fecha_solicitud': datos_procesar.get('api_fecha_solicitud', ''),
+        }
+
+        # URL y headers para la petición a la API
+        url = 'http://localhost:8000/crear_pdf_manual/'
+        token = '95f397a7bce2f2ffbe6c404caa1994ae991c4ee5'
+        headers = {'Authorization': f'Token {token}'}
+
         # Realizar la petición POST
         respuesta = requests.post(url, json=datos_pdf, headers=headers)
         
         if respuesta.status_code == 200:
             # Instanciar el PDF en una variable
             contenido_pdf = respuesta.content
-            print("PDF instanciado en la variable correctamente.")
             return contenido_pdf
         else:
             print(f"Error en la solicitud: {respuesta.status_code}, Respuesta: {respuesta.text}")
@@ -286,6 +274,66 @@ def solicitud_pdf():
     except requests.exceptions.RequestException as e:
         print(f"Ocurrió un error al hacer la solicitud: {e}")
         return None
+
+"""
+Generar cotización (Guarda en db)
+"""
+
+def generar_cotizacion(request):
+    if request.method == 'POST':
+        datos_procesar = request.session.get('datos_procesar', {})
+        porcentaje = request.POST.get('porcentaje')
+        precio_final = request.POST.get('precio_final')
+
+        try:
+            cliente = Cliente.objects.get(rut_cliente=datos_procesar.get('rut_cliente'))
+        except Cliente.DoesNotExist:
+            # Manejar el caso en que el cliente no exista
+            return HttpResponse("Error: Cliente no encontrado.", status=404)
+
+        # Validar precio_final
+        if precio_final is None or precio_final == '':
+            return HttpResponse("Error: Precio final no proporcionado.", status=400)
+
+        try:
+            precio_final = float(precio_final)
+        except ValueError:
+            return HttpResponse("Error: Precio final inválido.", status=400)
+
+        nueva_solicitud = Solicitud_Cotizacion(
+            rut_cliente=cliente,
+            largo=datos_procesar.get('largo'),
+            ancho=datos_procesar.get('ancho'),
+            alto=datos_procesar.get('alto'),
+            cantidad_caja=datos_procesar.get('cantidad'),
+            cod_carton=datos_procesar.get('tipo_carton'),
+            comentario=datos_procesar.get('comentario', ''),
+            estado='Estado por definir',  # Ajusta según tus necesidades
+            monto_total=precio_final
+        )
+        nueva_solicitud.save()
+
+        # Obtener el ID de la solicitud recién creada
+        id_solicitud = nueva_solicitud.id_cotizacion
+
+        # Llamar a la función solicitud_pdf con el ID de la solicitud
+        contenido_pdf = solicitud_pdf(request, id_solicitud)
+
+        # No limpiar la sesión aquí, ya que los datos se utilizarán más adelante
+        # request.session.pop('datos_procesar', None)
+        # request.session.pop('datos_calculo_precio', None)
+
+        # Redirigir a una página de confirmación o mostrar un mensaje de éxito
+        return render(request, 'generar_cotizacion.html', {'solicitud': nueva_solicitud, 'contenido_pdf': contenido_pdf})
+    else:
+        # Si no es una solicitud POST, redirigir al formulario
+        return redirect('cotizacion_manual')
+
+"""
+Enviar cotizacion (Envia correo pdf API)
+"""
+def enviar_cotizacion (request):
+    return render(request, 'enviar_cotizacion.html')
 
 """
 Seleccionar parámetros
@@ -350,6 +398,19 @@ def cotizacion_manual (request):
         return render(request, 'cotizacion_manual.html')
 
 def calculo_de_precio(request):
+
+
+    if request.method == 'POST':
+        porcentaje = request.POST.get('porcentaje')
+        precio_final = request.POST.get('precio_final')
+
+    datos_calculo_precio = {
+        'porcentaje': porcentaje,
+        'precio_final': precio_final,
+    }
+
+    request.session['datos_calculo_precio'] = datos_calculo_precio    
+
     return render(request, 'calculo_de_precio.html')
 
 def creacion_cliente(request):
@@ -651,28 +712,3 @@ def procesar_datos(request):
                                                           'api_area_caja':api_area_caja, #API
                                                           'api_area_total_plancha':api_area_total_plancha
                                                           })  
-        
-    
-        # return render(request, 'calculo_de_precio.html',{'largo':largo,
-        #                                                   'ancho':ancho,
-        #                                                   'alto':alto,
-        #                                                   'cantidad':cantidad,
-        #                                                   'tipo_carton':tipo_carton,
-        #                                                   'porcentajes':porcentajes,
-        #                                                   'largostr':largostr,
-        #                                                   'anchostr':anchostr,
-        #                                                   'altostr':altostr,
-        #                                                   'largo_hm':largo_hm,
-        #                                                   'ancho_hm':ancho_hm,
-        #                                                   'media_hm':media_hm,
-        #                                                   'largo_hm_str':largo_hm_str,
-        #                                                   'ancho_hm_str':ancho_hm_str,
-        #                                                   'media_hm_str':media_hm_str,
-        #                                                   'plancha_necesaria':plancha_seleccionada,
-        #                                                   'excedente_vertical':excedente_vertical,
-        #                                                   'excedente_horizontal':excedente_horizontal,
-        #                                                   'total_cajas_por_plancha': total_cajas_por_plancha,
-        #                                                   'precio_base':precio_unidad,
-        #                                                   'costo_ex_vertical':round(costo_ex_vertical),
-        #                                                   'costo_ex_horizontal':round(costo_ex_horizontal),
-        #                                                   'costo_por_unidad':round(costo_por_unidad),})

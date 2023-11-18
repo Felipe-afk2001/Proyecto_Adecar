@@ -25,6 +25,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('calcular_auto/', calcular_auto, name='calcular_auto'),
     path('calcular_manual/', calcular_manual, name='calcular_manual'),
-    path('crear_pdf/', crear_pdf_manual, name='crear_pdf_manual'),
+    path('crear_pdf_manual/', crear_pdf_manual, name='crear_pdf_manual'),
     path('crear_correo/', crear_correo, name='crear_correo'),
 ]
