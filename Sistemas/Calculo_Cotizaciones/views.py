@@ -8,9 +8,11 @@ from Calculo_Cotizaciones.models import Parametro #Para hacer las validaciones d
 from django.http import JsonResponse, HttpResponse
 from Calculo_Cotizaciones.models import Tipo_Plancha, Historial, Cliente, Solicitud_Cotizacion
 from django.db import connection
+from datetime import datetime
 from django.core.paginator import Paginator
 import Calculo_Cotizaciones.dash_apps
 import requests
+import base64
 import math
 from .forms import ParametroForm, PlanchaForm
 import os
@@ -305,6 +307,7 @@ def generar_cotizacion(request):
             largo=datos_procesar.get('largo'),
             ancho=datos_procesar.get('ancho'),
             alto=datos_procesar.get('alto'),
+            fecha_cotizacion=datetime.now(),
             cantidad_caja=datos_procesar.get('cantidad'),
             cod_carton=datos_procesar.get('tipo_carton'),
             comentario=datos_procesar.get('comentario', ''),
@@ -316,15 +319,17 @@ def generar_cotizacion(request):
         # Obtener el ID de la solicitud recién creada
         id_solicitud = nueva_solicitud.id_cotizacion
 
-        # Llamar a la función solicitud_pdf con el ID de la solicitud
-        contenido_pdf = solicitud_pdf(request, id_solicitud)
-
         # No limpiar la sesión aquí, ya que los datos se utilizarán más adelante
         # request.session.pop('datos_procesar', None)
         # request.session.pop('datos_calculo_precio', None)
 
         # Redirigir a una página de confirmación o mostrar un mensaje de éxito
-        return render(request, 'generar_cotizacion.html', {'solicitud': nueva_solicitud, 'contenido_pdf': contenido_pdf})
+        contenido_pdf = solicitud_pdf(request, id_solicitud)
+
+        # Codificar el PDF en base64 y crear una Data URL
+        pdf_base64 = base64.b64encode(contenido_pdf).decode()
+        data_url = f'data:application/pdf;base64,{pdf_base64}'
+        return render(request, 'generar_cotizacion.html', {'solicitud': nueva_solicitud, 'data_url': data_url})
     else:
         # Si no es una solicitud POST, redirigir al formulario
         return redirect('cotizacion_manual')
