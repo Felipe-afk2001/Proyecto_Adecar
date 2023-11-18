@@ -31,7 +31,7 @@ app = DjangoDash('SolicitudCotizacionDash')
 
 # Configurar los gráficos y el layout de la aplicación Dash
 app.layout = html.Div([
-    html.H1('Dashboards de Cotizaciones Realizadas'),
+    html.H1('Estadísticas de Cotizaciones'),
 
     dcc.Graph(
         id='cotizaciones-por-cliente',
