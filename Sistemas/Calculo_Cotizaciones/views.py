@@ -229,32 +229,41 @@ def solicitud_pdf(request, id_solicitud):
     try:
         # Obtener datos desde la sesión
         datos_procesar = request.session.get('datos_procesar', {})
-        datos_calculo_precio = request.session.get('datos_calculo_precio', {})
-
+        datos_calculo = request.session.get('datos_calculo_precio', {})
+        area_calculada = round(datos_procesar.get('largo_hm') * datos_procesar.get('ancho_hm'), 0)
         # Asegurarse de obtener el cliente y su correo
         rut_cliente = datos_procesar.get('rut_cliente', '')
         try:
             cliente = Cliente.objects.get(rut_cliente=rut_cliente)
             correo_cliente = cliente.correo
+            nombre_completo = f'{cliente.nombre} {cliente.apellido}'
         except Cliente.DoesNotExist:
             correo_cliente = ''
 
         # Datos que se enviarán en la petición a la API
         datos_pdf = {
-            'nombre_cliente': datos_procesar.get('nombre_cliente', ''),
+            'porcentaje_utilidad': datos_calculo.get('porcentaje'),
+            'precio_total': int(round(float(datos_calculo.get('precio_final')))),
+            'cantidad_plancha':'',
+            'largo_maximo_caja':datos_procesar.get('largo_hm_str'),
+            'alto_max_caja':datos_procesar.get('ancho_hm_str'),
+            'largo_caja':int(datos_procesar.get('largo')),
+            'ancho_caja':int(datos_procesar.get('ancho')),
+            'alto_caja':int(datos_procesar.get('alto')),
+            'area_caja':area_calculada,
+            'comentario':'', #Agregar si es posible.
+            'nombre_cliente': nombre_completo,
             'rut_cliente': rut_cliente,
             'correo_cliente': correo_cliente,
             'id_solicitud': id_solicitud,  # ID de la solicitud recién creada
             'alto_max_caja': datos_procesar.get('ancho_hm', ''),
             'area_caja': datos_procesar.get('api_area_caja', ''),
-            'cantidad_cajas': datos_procesar.get('api_cantidad_cajas', ''),
+            'cantidad_cajas': datos_procesar.get('cantidad', ''),
             'id_tipo_plancha': datos_procesar.get('tipo_carton', ''),
             'area_total_plancha': datos_procesar.get('api_area_total_plancha', ''),
             'coste_creacion': 50,
             'coste_materia_prima': datos_procesar.get('api_precio_plancha', ''),
-            'precio_caja': datos_procesar.get('costo_por_unidad', ''),
-            'precio_total': datos_calculo_precio.get('precio_total'),
-            'porcentaje_utilidad': datos_calculo_precio.get('porcentaje'),
+            'precio_caja': int(round(datos_procesar.get('costo_por_unidad', ''))),
             'fecha_solicitud': datos_procesar.get('api_fecha_solicitud', ''),
         }
 
@@ -287,6 +296,13 @@ def generar_cotizacion(request):
         porcentaje = request.POST.get('porcentaje')
         precio_final = request.POST.get('precio_final')
 
+        datos_calculo_precio = {
+            'porcentaje': porcentaje,
+            'precio_final': precio_final,
+        }
+
+        request.session['datos_calculo_precio'] = datos_calculo_precio    
+
         try:
             cliente = Cliente.objects.get(rut_cliente=datos_procesar.get('rut_cliente'))
         except Cliente.DoesNotExist:
@@ -311,13 +327,14 @@ def generar_cotizacion(request):
             cantidad_caja=datos_procesar.get('cantidad'),
             cod_carton=datos_procesar.get('tipo_carton'),
             comentario=datos_procesar.get('comentario', ''),
-            estado='Estado por definir',  # Ajusta según tus necesidades
+            estado='Pendiente',
             monto_total=precio_final
         )
         nueva_solicitud.save()
 
         # Obtener el ID de la solicitud recién creada
         id_solicitud = nueva_solicitud.id_cotizacion
+        request.session['id_solicitud'] = id_solicitud #Pasandola a un session para usar mas adelante.
 
         # No limpiar la sesión aquí, ya que los datos se utilizarán más adelante
         # request.session.pop('datos_procesar', None)
@@ -335,10 +352,67 @@ def generar_cotizacion(request):
         return redirect('cotizacion_manual')
 
 """
-Enviar cotizacion (Envia correo pdf API)
+Enviar cotizacion (Envia correo PDF API a Cliente)
 """
-def enviar_cotizacion (request):
-    return render(request, 'enviar_cotizacion.html')
+def enviar_cotizacion(request):
+    # Asegurarse de que solo se procese como una solicitud POST
+    if request.method != 'POST':
+        return redirect('cotizacion_manual')
+
+    try:
+        # Obtener datos desde la sesión
+        datos_procesar = request.session.get('datos_procesar', {})
+        datos_calculo_precio = request.session.get('datos_calculo_precio', {})
+        rut_cliente = datos_procesar.get('rut_cliente', '')
+
+        cliente = Cliente.objects.get(rut_cliente=rut_cliente)
+        id_solicitud = request.session.get('id_solicitud')
+        Sol_Cot = Solicitud_Cotizacion.objects.get(id_cotizacion=id_solicitud)
+        # Preparar los datos para enviar a la API
+        fecha_cotizacion = Sol_Cot.fecha_cotizacion.strftime('%Y-%m-%d %H:%M:%S')
+        nombre_completo = f'{cliente.nombre} {cliente.apellido}'
+        datos_api = {
+            'cantidad_plancha':'',
+            'largo_caja':int(datos_procesar.get('largo')),
+            'ancho_caja':int(datos_procesar.get('ancho')),
+            'alto_caja':int(datos_procesar.get('alto')),
+            'nombre_cliente': nombre_completo,
+            'rut_cliente': rut_cliente,
+            'correo_cliente': cliente.correo,
+            'id_solicitud': id_solicitud,
+            'comentario': '',
+            'largo_maximo_caja': datos_procesar.get('largo_hm_str', ''),
+            'alto_max_caja': datos_procesar.get('ancho_hm_str', ''),
+            'area_caja': datos_procesar.get('api_area_caja', ''),
+            'cantidad_cajas': datos_procesar.get('cantidad', ''),
+            'id_tipo_plancha': datos_procesar.get('tipo_carton', ''),
+            'area_total_plancha': datos_procesar.get('api_area_total_plancha', ''),
+            'coste_creacion': 50,
+            'coste_materia_prima': datos_procesar.get('api_precio_plancha', ''),
+            'precio_caja': datos_procesar.get('costo_por_unidad', ''),
+            'precio_total': int(round(float(datos_calculo_precio.get('precio_final')))),
+            'porcentaje_utilidad': datos_calculo_precio.get('porcentaje', ''),
+            'fecha_solicitud': fecha_cotizacion,
+        }
+
+        # URL y headers para la petición a la API
+        url = 'http://localhost:8000/crear_correo/'
+        token = '95f397a7bce2f2ffbe6c404caa1994ae991c4ee5'  # Asegúrate de usar tu token real aquí
+        headers = {'Authorization': f'Token {token}'}
+
+        # Realizar la petición POST
+        respuesta = requests.post(url, json=datos_api, headers=headers)
+
+        if respuesta.status_code == 200:
+            # Mostrar una página de confirmación
+            return render(request, 'enviar_cotizacion.html', {'mensaje': 'Correo enviado con éxito, redirigiendo...'})
+        else:
+            # Mostrar un mensaje de error y quedarse en la misma página
+            return render(request, 'generar_cotizacion.html', {'mensaje': 'Error al enviar el correo, por favor comuníquese con soporte al cliente'})
+    
+    except Exception as e:
+        # Mostrar un mensaje de error y quedarse en la misma página
+        return render(request, 'generar_cotizacion.html', {'mensaje': f"Error al enviar la cotización: {e}, por favor comuníquese con soporte al cliente"})
 
 """
 Seleccionar parámetros
@@ -403,18 +477,6 @@ def cotizacion_manual (request):
         return render(request, 'cotizacion_manual.html')
 
 def calculo_de_precio(request):
-
-
-    if request.method == 'POST':
-        porcentaje = request.POST.get('porcentaje')
-        precio_final = request.POST.get('precio_final')
-
-    datos_calculo_precio = {
-        'porcentaje': porcentaje,
-        'precio_final': precio_final,
-    }
-
-    request.session['datos_calculo_precio'] = datos_calculo_precio    
 
     return render(request, 'calculo_de_precio.html')
 

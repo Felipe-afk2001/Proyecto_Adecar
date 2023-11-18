@@ -22,12 +22,21 @@
 {% endblock %}
 
 {% block section %}
+{% if mensaje %}
+    <div class="container">
+        <div class="alert alert-danger">
+            {{ mensaje }}
+        </div>
+    </div>
+{% endif %}
 <iframe src="{{ data_url }}" width="100%" height="400px"></iframe>
 
-<!-- Contenedor para centrar los botones -->
-<div style="text-align: center; margin-top: 20px;">
-    <a href="{% url 'enviar_cotizacion' %}" class="btn btn-primary">Enviar Cotización</a>
-    <a href="{% url 'cotizacion_manual' %}" class="btn btn-secondary" style="margin-left: 10px;">Volver a Cotizar</a>
+<div style="text-align: center; margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
+    <form action="{% url 'enviar_cotizacion' %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Enviar a Cliente</button>
+    </form>
+    <a href="{% url 'cotizacion_manual' %}" class="btn btn-secondary">Volver a Cotizar</a>
 </div>
 {% endblock %}
 

@@ -22,7 +22,17 @@
 {% endblock %}
 
 {% block section %}
-
+<div class="container">
+    <div class="alert alert-success">
+        {{ mensaje }}
+    </div>
+    <!-- Redireccionar después de 5 segundos -->
+    <script type="text/javascript">
+        setTimeout(function(){
+            window.location.href = "{% url 'cotizacion_manual' %}";
+        }, 5000);
+    </script>
+</div>
 {% endblock %}
 
 {% block js %}

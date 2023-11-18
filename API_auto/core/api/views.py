@@ -212,11 +212,11 @@ def crear_pdf_manual(request):
             p.drawString(50, altura_detalle, 'Medidas Solicitadas')
             altura_detalle -= 20
             p.setFont("Helvetica", 12)
-            p.drawString(50, altura_detalle, f'Largo Caja: {data.get("largo_caja", 0)}')
+            p.drawString(50, altura_detalle, f'Largo Caja: {data.get("largo_caja", 0)} mm')
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f"Ancho Caja: {data.get('ancho_caja', 0)} ")
+            p.drawString(50, altura_detalle, f"Ancho Caja: {data.get('ancho_caja', 0)} mm")
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f"Alto Caja: {data.get('alto_caja', 0)}")
+            p.drawString(50, altura_detalle, f"Alto Caja: {data.get('alto_caja', 0)} mm")
             altura_detalle -= 30
             
             # Medidas en Plano
@@ -224,11 +224,11 @@ def crear_pdf_manual(request):
             p.drawString(50, altura_detalle, 'Medidas en Plano')
             altura_detalle -= 20
             p.setFont("Helvetica", 12)
-            p.drawString(50, altura_detalle, f'Largo total de la caja: {largo_maximo_caja}')
+            p.drawString(50, altura_detalle, f'Largo total de la caja: {largo_maximo_caja} mm')
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f'Alto total de la caja: {alto_max_caja}')
+            p.drawString(50, altura_detalle, f'Alto total de la caja: {alto_max_caja} mm')
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f'Area total de la caja: {area_caja}')
+            p.drawString(50, altura_detalle, f'Area total de la caja: {area_caja} mm²')
             altura_detalle -= 30
 
             # Plancha Utilizada
@@ -238,7 +238,7 @@ def crear_pdf_manual(request):
             p.setFont("Helvetica", 12)
             p.drawString(50, altura_detalle, f'Tipo de plancha: {id_tipo_plancha}',)
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f'Area total de la plancha: {area_total_plancha}',)
+            p.drawString(50, altura_detalle, f'Area total de la plancha: {area_total_plancha} mm²',)
             altura_detalle -= 30
 
             # Costos
@@ -246,15 +246,15 @@ def crear_pdf_manual(request):
             p.drawString(50, altura_detalle, 'Costos')
             altura_detalle -= 20
             p.setFont("Helvetica", 12)
-            p.drawString(50, altura_detalle, f'Cantidad de cajas solicitadas: {cantidad_caja}',)
+            p.drawString(50, altura_detalle, f'Cantidad de cajas solicitadas: {cantidad_caja} unidades',)
             altura_detalle -= 15
             p.drawString(50, altura_detalle, f'Cantidad de planchas necesitadas: {cantidad_plancha}',)
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f'Costos por la cantidad de planchas: {coste_materia_prima}',)
+            p.drawString(50, altura_detalle, f'Costos por la cantidad de planchas: ${coste_materia_prima}',)
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f'Porcentaje de venta: {porcentaje_utilidad}',)
+            p.drawString(50, altura_detalle, f'Porcentaje de venta: {porcentaje_utilidad}%',)
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f'Costo de fabricacion: {coste_creacion}',)
+            p.drawString(50, altura_detalle, f'Costo de fabricación: ${coste_creacion}',)
             altura_detalle -= 30
 
             # Precios Finales
@@ -262,9 +262,9 @@ def crear_pdf_manual(request):
             p.drawString(50, altura_detalle, 'Precios Finales')
             altura_detalle -= 20
             p.setFont("Helvetica", 12)
-            p.drawString(50, altura_detalle, f'Precio Unitario por Caja: {precio_caja}')
+            p.drawString(50, altura_detalle, f'Precio Unitario por Caja: ${precio_caja}')
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f'Precio Total por Cajas: {precio_total}')
+            p.drawString(50, altura_detalle, f'Precio Total por Cajas: ${precio_total}')
             altura_detalle -= 25
 
             #linea final
@@ -356,11 +356,11 @@ def crear_correo(request):
             p.drawString(50, altura_detalle, 'Medidas Solicitadas')
             altura_detalle -= 20
             p.setFont("Helvetica", 12)
-            p.drawString(50, altura_detalle, f'Largo Caja: {data.get("largo_caja", 0)}')
+            p.drawString(50, altura_detalle, f'Largo Caja: {data.get("largo_caja", 0)} mm')
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f"Ancho Caja: {data.get('ancho_caja', 0)} ")
+            p.drawString(50, altura_detalle, f"Ancho Caja: {data.get('ancho_caja', 0)} mm")
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f"Alto Caja: {data.get('alto_caja', 0)}")
+            p.drawString(50, altura_detalle, f"Alto Caja: {data.get('alto_caja', 0)} mm")
             altura_detalle -= 30
             
             # Medidas en Plano
@@ -368,11 +368,11 @@ def crear_correo(request):
             p.drawString(50, altura_detalle, 'Medidas en Plano')
             altura_detalle -= 20
             p.setFont("Helvetica", 12)
-            p.drawString(50, altura_detalle, f'Largo total de la caja: {largo_maximo_caja}')
+            p.drawString(50, altura_detalle, f'Largo total de la caja: {largo_maximo_caja} mm')
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f'Alto total de la caja: {alto_max_caja}')
+            p.drawString(50, altura_detalle, f'Alto total de la caja: {alto_max_caja} mm')
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f'Area total de la caja: {area_caja}')
+            p.drawString(50, altura_detalle, f'Area total de la caja: {area_caja} mm²')
             altura_detalle -= 30
 
             # Plancha Utilizada
@@ -382,7 +382,7 @@ def crear_correo(request):
             p.setFont("Helvetica", 12)
             p.drawString(50, altura_detalle, f'Tipo de plancha: {id_tipo_plancha}',)
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f'Area total de la plancha: {area_total_plancha}',)
+            p.drawString(50, altura_detalle, f'Area total de la plancha: {area_total_plancha} mm²',)
             altura_detalle -= 30
 
             # Costos
@@ -390,15 +390,15 @@ def crear_correo(request):
             p.drawString(50, altura_detalle, 'Costos')
             altura_detalle -= 20
             p.setFont("Helvetica", 12)
-            p.drawString(50, altura_detalle, f'Cantidad de cajas solicitadas: {cantidad_caja}',)
+            p.drawString(50, altura_detalle, f'Cantidad de cajas solicitadas: {cantidad_caja} unidades',)
             altura_detalle -= 15
             p.drawString(50, altura_detalle, f'Cantidad de planchas necesitadas: {cantidad_plancha}',)
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f'Costos por la cantidad de planchas: {coste_materia_prima}',)
+            p.drawString(50, altura_detalle, f'Costos por la cantidad de planchas: ${coste_materia_prima}',)
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f'Porcentaje de venta: {porcentaje_utilidad}',)
+            p.drawString(50, altura_detalle, f'Porcentaje de venta: {porcentaje_utilidad}%',)
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f'Costo de fabricacion: {coste_creacion}',)
+            p.drawString(50, altura_detalle, f'Costo de fabricación: ${coste_creacion}',)
             altura_detalle -= 30
 
             # Precios Finales
@@ -406,9 +406,9 @@ def crear_correo(request):
             p.drawString(50, altura_detalle, 'Precios Finales')
             altura_detalle -= 20
             p.setFont("Helvetica", 12)
-            p.drawString(50, altura_detalle, f'Precio Unitario por Caja: {precio_caja}')
+            p.drawString(50, altura_detalle, f'Precio Unitario por Caja: ${precio_caja}')
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f'Precio Total por Cajas: {precio_total}')
+            p.drawString(50, altura_detalle, f'Precio Total por Cajas: ${precio_total}')
             altura_detalle -= 25
 
             #linea final
