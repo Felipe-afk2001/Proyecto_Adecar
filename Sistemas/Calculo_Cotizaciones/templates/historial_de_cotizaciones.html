@@ -31,7 +31,7 @@
 
 <div class="container mt-5">
     <h2 class="mb-4">Historial de cotizaciones</h2>
-    <div class="filter-section">
+    <div class="filter-section" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;">
         <select id="filtroEstado">
             <option value="">Todos los Estados</option>
             <option value="Pendiente">Pendiente</option>
@@ -45,6 +45,9 @@
         <input type="text" id="filtroRut" placeholder="Sin puntos y con guión">
         <button onclick="filtrarHistorial()">Filtrar</button>
         <button onclick="borrarFiltros()">Borrar filtros</button>
+        <button onclick="descargarExcel()" class="excel-button">
+            <i class="fas fa-file-excel"></i> Descargar a Excel
+        </button>
     </div>
     <table class="table table-bordered table-hover" id="historialTabla">
         <thead class="thead-dark">
@@ -157,6 +160,8 @@
             row.style.display = '';
         });
     }
-    
+    function descargarExcel() {
+        window.location.href = '/descargar_excel_historial';
+    }
 </script>
 {% endblock %}

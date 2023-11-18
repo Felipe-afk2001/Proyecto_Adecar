@@ -17,6 +17,8 @@ import math
 from .forms import ParametroForm, PlanchaForm
 import os
 from .models import Usuario
+import pandas as pd
+from io import BytesIO
 
 def custom_login_view(request):
     if request.method == 'POST':
@@ -68,7 +70,33 @@ def lista_historial(request):
     historial = paginator.get_page(page)
 
     return render(request, 'historial_de_cotizaciones.html', {'historial': historial})
+"""
+Descargar historial en excel
+"""
+def descargar_excel_historial(request):
+    # Crear un DataFrame con los datos del historial
+    data = Solicitud_Cotizacion.objects.all().values()
+    df = pd.DataFrame(data)
 
+    # Convertir los datetimes a un formato sin zona horaria
+    if 'fecha_cotizacion' in df:
+        df['fecha_cotizacion'] = df['fecha_cotizacion'].dt.tz_localize(None)
+
+    # Crear un buffer en memoria para el archivo Excel
+    excel_buffer = BytesIO()
+
+    # Usar ExcelWriter para escribir el DataFrame en el buffer
+    with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False)
+
+    # Establecer el puntero del buffer al comienzo
+    excel_buffer.seek(0)
+
+    # Crear la respuesta HTTP con el buffer como contenido del archivo
+    response = HttpResponse(excel_buffer.getvalue(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="Historial_Cotizaciones_Adecar.xlsx"'
+
+    return response
 """
 Mantención de planchas
 """
