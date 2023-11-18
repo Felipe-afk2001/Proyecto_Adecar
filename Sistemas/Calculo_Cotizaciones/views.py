@@ -61,7 +61,7 @@ def dashboards(request):
 Historial de cotizaciones
 """
 def lista_historial(request):
-    historial_list = Historial.objects.all()
+    historial_list = Solicitud_Cotizacion.objects.all()
     paginator = Paginator(historial_list, 10) # Muestra 20 registros por página
 
     page = request.GET.get('page')

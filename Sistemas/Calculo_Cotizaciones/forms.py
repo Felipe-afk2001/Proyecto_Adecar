@@ -24,7 +24,7 @@ class ParametroForm(forms.ModelForm):
         model = Parametro
         fields = ['id_parametro', 'largo_maximo', 'ancho_maximo', 'excedente_horizontal', 'excedente_vertical']
         widgets = {
-            'id_parametro': forms.NumberInput(attrs={'placeholder': 'ID Parámetro'}),
+            'id_parametro': forms.NumberInput(attrs={'placeholder': 'ID Parámetro', 'disabled': True}),
             'largo_maximo': forms.NumberInput(attrs={'placeholder': 'Largo Máximo'}),
             'ancho_maximo': forms.NumberInput(attrs={'placeholder': 'Ancho Máximo'}),
             'excedente_horizontal': forms.NumberInput(attrs={'placeholder': 'Excedente Horizontal'}),
@@ -36,7 +36,7 @@ class PlanchaForm(forms.ModelForm):
         model = Tipo_Plancha
         fields = ['id_tipo_plancha', 'largo', 'ancho', 'area', 'cod_carton', 'precio_proveedor']
         widgets = {
-            'id_tipo_plancha': forms.TextInput(attrs={'placeholder': 'ID Plancha'}),
+            'id_tipo_plancha': forms.TextInput(attrs={'placeholder': 'ID Plancha', 'disabled': True}),
             'largo': forms.NumberInput(attrs={'placeholder': 'Largo'}),
             'ancho': forms.NumberInput(attrs={'placeholder': 'Ancho'}),
             'area': forms.NumberInput(attrs={'placeholder': 'Área'}), #Agregar acento en el label

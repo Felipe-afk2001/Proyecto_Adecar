@@ -52,7 +52,7 @@
                 <th>ID</th>
                 <th>RUT</th>
                 <th>Nombre Cliente</th>
-                <th>Fecha</th>
+                <th>Fecha Cotización</th>
                 <th>Estado</th>
             </tr>
         </thead>
@@ -60,11 +60,11 @@
             {% if historial %}
                 {% for historia in historial %}
                 <tr>
-                    <td>{{ historia.id_historial }}</td>
-                    <td>{{ historia.rut_cliente }}</td>
+                    <td>{{ historia.id_cotizacion }}</td>
+                    <td>{{ historia.rut_cliente_id }}</td>
                     <td>{{ historia.nombre_cliente }} {{ historia.apellido_cliente }}</td>
                     <td>{{ historia.fecha_cotizacion }}</td>
-                    <td>{{ historia.estado_cotizacion }}</td>
+                    <td>{{ historia.estado }}</td>
                 </tr>
                 {% endfor %}
             {% else %}
