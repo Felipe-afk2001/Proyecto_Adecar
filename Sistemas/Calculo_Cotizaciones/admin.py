@@ -2,19 +2,10 @@ from django.contrib import admin
 
 from django.contrib import admin
 from django import forms
-from .models import Usuario
+from .models import Solicitud_Cotizacion
 
-class UsuarioAdminForm(forms.ModelForm):
+class solicitud(admin.ModelAdmin):
     class Meta:
-        model = Usuario
+        model = Solicitud_Cotizacion
         fields = '__all__'
-
-class UsuarioAdmin(admin.ModelAdmin):
-    form = UsuarioAdminForm
-    list_display = ('username', 'email', 'nombre', 'apellidos', 'perfil', 'token', 'es_activo', 'es_staff')
-    list_filter = ('perfil', 'es_activo', 'es_staff')
-    search_fields = ('username', 'email', 'nombre', 'apellidos')
-    ordering = ('username',)
-
-admin.site.register(Usuario, UsuarioAdmin)
-# Register your models here.
+admin.site.register(Solicitud_Cotizacion, solicitud)

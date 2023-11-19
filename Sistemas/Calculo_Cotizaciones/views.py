@@ -6,7 +6,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth import login, authenticate
 from Calculo_Cotizaciones.models import Parametro #Para hacer las validaciones de los parámetros
 from django.http import JsonResponse, HttpResponse
-from Calculo_Cotizaciones.models import Tipo_Plancha, Historial, Cliente, Solicitud_Cotizacion
+from Calculo_Cotizaciones.models import Tipo_Plancha, Cliente, Solicitud_Cotizacion
 from django.db import connection
 from datetime import datetime
 from django.core.paginator import Paginator
@@ -15,11 +15,10 @@ import requests
 import base64
 import math
 from .forms import ParametroForm, PlanchaForm
-import os
-from .models import Usuario
 import pandas as pd
 from io import BytesIO
 
+# vista del login
 def custom_login_view(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -41,6 +40,7 @@ def custom_login_view(request):
 def home (request):
     return render(request, 'home.html')
 
+#crear super usuarios
 def registrar(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -52,6 +52,19 @@ def registrar(request):
     else:
         form = UserCreationForm()
     return render(request, 'registrar.html', {'form': form})
+
+#cambiar el estado
+def estados(request, id_solicitud):
+    solicitud = get_object_or_404(Solicitud_Cotizacion, id_cotizacion=id_solicitud) 
+    if request.method == 'POST':
+        solicitud.estado = 'Aceptado'  # Cambia el estado a 'Aceptado'
+        solicitud.save()
+        messages.success(request, 'La solicitud ha sido aceptada con éxito.')
+        return redirect('agradecimiento')
+    return render(request, 'compra.html', {'solicitud': solicitud})
+
+def agradecimiento(request):
+    return render(request, 'agradecimiento.html')
 
 """
 dashboards
@@ -272,9 +285,9 @@ def solicitud_pdf(request, id_solicitud):
         datos_pdf = {
             'porcentaje_utilidad': datos_calculo.get('porcentaje'),
             'precio_total': int(round(float(datos_calculo.get('precio_final')))),
-            'cantidad_plancha':'',
+            'cantidad_planchas':int(datos_procesar.get('api_cantidad_plancha')),
             'largo_maximo_caja':datos_procesar.get('largo_hm_str'),
-            'alto_max_caja':datos_procesar.get('ancho_hm_str'),
+            'alto_maximo_caja':datos_procesar.get('ancho_hm_str'),
             'largo_caja':int(datos_procesar.get('largo')),
             'ancho_caja':int(datos_procesar.get('ancho')),
             'alto_caja':int(datos_procesar.get('alto')),
@@ -400,7 +413,7 @@ def enviar_cotizacion(request):
         fecha_cotizacion = Sol_Cot.fecha_cotizacion.strftime('%Y-%m-%d %H:%M:%S')
         nombre_completo = f'{cliente.nombre} {cliente.apellido}'
         datos_api = {
-            'cantidad_plancha':'',
+            'cantidad_planchas':int(datos_procesar.get('api_cantidad_plancha')),
             'largo_caja':int(datos_procesar.get('largo')),
             'ancho_caja':int(datos_procesar.get('ancho')),
             'alto_caja':int(datos_procesar.get('alto')),
@@ -410,7 +423,7 @@ def enviar_cotizacion(request):
             'id_solicitud': id_solicitud,
             'comentario': '',
             'largo_maximo_caja': datos_procesar.get('largo_hm_str', ''),
-            'alto_max_caja': datos_procesar.get('ancho_hm_str', ''),
+            'alto_maximo_caja': datos_procesar.get('ancho_hm_str', ''),
             'area_caja': datos_procesar.get('api_area_caja', ''),
             'cantidad_cajas': datos_procesar.get('cantidad', ''),
             'id_tipo_plancha': datos_procesar.get('tipo_carton', ''),
@@ -709,9 +722,10 @@ def procesar_datos(request):
             api_coste_creacion = resultado_api['coste_creacion']
             api_coste_materia_prima = resultado_api['coste_materia_prima']
             api_cantidad_cajas = resultado_api['cantidad_cajas']
-            api_cantidad_x_plancha = resultado_api['cantidad_planchas']
+            api_cantidad_x_plancha = resultado_api['cantidad_x_plancha']
             api_precio_caja = resultado_api['precio_caja']
             api_precio_total = resultado_api['precio_total']
+            api_cantidad_plancha = resultado_api['cantidad_planchas']
 
             print(resultado_api)
         else:
@@ -771,7 +785,9 @@ def procesar_datos(request):
             'nombre_cliente': nombre_cliente,
             'apellido_cliente': apellido_cliente,
             'api_area_caja': api_area_caja,
-            'api_area_total_plancha': api_area_total_plancha
+            'api_area_total_plancha': api_area_total_plancha,
+            'api_cantidad_plancha': api_cantidad_plancha,
+            'api_cantidad_x_plancha': api_cantidad_x_plancha
         }
 
         request.session['datos_procesar'] = datos_procesar
@@ -805,5 +821,6 @@ def procesar_datos(request):
                                                           'nombre_cliente':nombre_cliente,
                                                           'apellido_cliente':apellido_cliente,
                                                           'api_area_caja':api_area_caja, #API
-                                                          'api_area_total_plancha':api_area_total_plancha
+                                                          'api_area_total_plancha':api_area_total_plancha,
+                                                          'api_cantidad_x_plancha': api_cantidad_x_plancha
                                                           })  
