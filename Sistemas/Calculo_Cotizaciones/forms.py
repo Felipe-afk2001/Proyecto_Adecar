@@ -1,7 +1,7 @@
 from django import forms
 from .models import Parametro, Tipo_Plancha
 from django.contrib.auth.forms import AuthenticationForm
-from .models import Usuario  # Asegúrate de importar tu modelo de usuario personalizado
+from .models import Usuario
 
 class CustomAuthenticationForm(AuthenticationForm):
     class Meta:

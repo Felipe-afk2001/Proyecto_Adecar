@@ -504,16 +504,6 @@ def calcular_cajas_por_plancha(largo_hm, media_hm, ancho_hm, tipo_carton):
 VISTAS DE COTIZACIÓN MANUAL
 -----------------------------------------------------------------------------
 """
-
-# def visualiza_pdf(request):
-#     if request.method == 'POST':
-#         porcentaje = request.POST.get('porcentaje')
-#         # Procesa otros datos del formulario según sea necesario
-#         # ...
-#         return render(request, 'visualiza_pdf', {'porcentaje': porcentaje})
-#     else:
-#         # Manejar otros métodos o devolver un error
-#         pass
 @login_required
 def cotizacion_manual (request):
         return render(request, 'cotizacion_manual.html')

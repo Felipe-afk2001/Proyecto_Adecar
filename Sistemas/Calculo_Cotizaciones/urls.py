@@ -31,5 +31,4 @@ urlpatterns = [
     path('generar_cotizacion/', generar_cotizacion, name='generar_cotizacion'),
     path('enviar_cotizacion/', enviar_cotizacion, name='enviar_cotizacion'),
     path('descargar_excel_historial/', descargar_excel_historial, name='descargar_excel_historial'),
-    # path('visualiza_pdf/', visualiza_pdf, name='visualiza_pdf'),   
 ]
