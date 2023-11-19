@@ -62,6 +62,7 @@ def dashboards(request):
 """
 Historial de cotizaciones
 """
+@login_required
 def lista_historial(request):
     historial_list = Solicitud_Cotizacion.objects.all()
     paginator = Paginator(historial_list, 10) # Muestra 20 registros por página
@@ -73,6 +74,7 @@ def lista_historial(request):
 """
 Descargar historial en excel
 """
+@login_required
 def descargar_excel_historial(request):
     # Crear un DataFrame con los datos del historial
     data = Solicitud_Cotizacion.objects.all().values()
@@ -100,10 +102,12 @@ def descargar_excel_historial(request):
 """
 Mantención de planchas
 """
+@login_required
 def lista_planchas(request):
     planchas = Tipo_Plancha.objects.all()
     return render(request, 'mantencion_planchas_form.html', {'planchas': planchas})
 
+@login_required
 def editar_plancha(request, id):
     plancha = get_object_or_404(Tipo_Plancha, pk=id)
     if request.method == 'POST':
@@ -115,11 +119,13 @@ def editar_plancha(request, id):
         form = PlanchaForm(instance=plancha)
     return render(request, 'editar_planchas.html', {'form': form, 'plancha': plancha})
 
+@login_required
 def eliminar_plancha(request, id):
     plancha = get_object_or_404(Tipo_Plancha, pk=id)
     plancha.delete()
     return redirect('lista_planchas')
 
+@login_required
 def crear_plancha(request):
     if request.method == 'POST':
         form = PlanchaForm(request.POST)
@@ -130,7 +136,7 @@ def crear_plancha(request):
         form = PlanchaForm()  
     return render(request, 'crear_planchas.html', {'form': form})
 
-
+@login_required
 def mantencion_planchas_form(request):
     plancha_id = request.GET.get('id_tipo_plancha')
     plancha = None
@@ -159,11 +165,12 @@ def mantencion_planchas_form(request):
 Mantención de parámetros
 -----------------------------------------------------------------------------
 """
-
+@login_required
 def lista_parametros(request):
     parametros = Parametro.objects.all()
     return render(request, 'mantencion_parametros_form.html', {'parametros': parametros})
 
+@login_required
 def editar_parametro(request, id):
     parametro = get_object_or_404(Parametro, pk=id)
     if request.method == 'POST':
@@ -175,11 +182,13 @@ def editar_parametro(request, id):
         form = ParametroForm(instance=parametro)
     return render(request, 'editar_parametros.html', {'form': form, 'parametro': parametro})
 
+@login_required
 def eliminar_parametro(request, id):
     parametro = get_object_or_404(Parametro, pk=id)
     parametro.delete()
     return redirect('lista_parametros')
 
+@login_required
 def crear_parametro(request):
     if request.method == 'POST':
         form = ParametroForm(request.POST)
@@ -190,6 +199,7 @@ def crear_parametro(request):
         form = ParametroForm()  # Un formulario vacío para un nuevo registro
     return render(request, 'crear_parametros.html', {'form': form})
 
+@login_required
 def mantencion_parametros_form(request):
     parametro_id = request.GET.get('id_parametro')
     parametro = None
@@ -252,7 +262,7 @@ def enviar_solicitud_api(largo, ancho, alto, largo_plancha, ancho_plancha, coste
 """
 API PDF Manual
 """
-
+@login_required
 def solicitud_pdf(request, id_solicitud):
     try:
         # Obtener datos desde la sesión
@@ -261,6 +271,7 @@ def solicitud_pdf(request, id_solicitud):
         area_calculada = round(datos_procesar.get('largo_hm') * datos_procesar.get('ancho_hm'), 0)
         # Asegurarse de obtener el cliente y su correo
         rut_cliente = datos_procesar.get('rut_cliente', '')
+        comentario = datos_procesar.get('comentarios', '')
         try:
             cliente = Cliente.objects.get(rut_cliente=rut_cliente)
             correo_cliente = cliente.correo
@@ -279,7 +290,7 @@ def solicitud_pdf(request, id_solicitud):
             'ancho_caja':int(datos_procesar.get('ancho')),
             'alto_caja':int(datos_procesar.get('alto')),
             'area_caja':area_calculada,
-            'comentario':'', #Agregar si es posible.
+            'comentario':comentario,
             'nombre_cliente': nombre_completo,
             'rut_cliente': rut_cliente,
             'correo_cliente': correo_cliente,
@@ -317,7 +328,7 @@ def solicitud_pdf(request, id_solicitud):
 """
 Generar cotización (Guarda en db)
 """
-
+@login_required
 def generar_cotizacion(request):
     if request.method == 'POST':
         datos_procesar = request.session.get('datos_procesar', {})
@@ -382,6 +393,7 @@ def generar_cotizacion(request):
 """
 Enviar cotizacion (Envia correo PDF API a Cliente)
 """
+@login_required
 def enviar_cotizacion(request):
     # Asegurarse de que solo se procese como una solicitud POST
     if request.method != 'POST':
@@ -392,6 +404,7 @@ def enviar_cotizacion(request):
         datos_procesar = request.session.get('datos_procesar', {})
         datos_calculo_precio = request.session.get('datos_calculo_precio', {})
         rut_cliente = datos_procesar.get('rut_cliente', '')
+        comentario = datos_procesar.get('comentarios', '')
 
         cliente = Cliente.objects.get(rut_cliente=rut_cliente)
         id_solicitud = request.session.get('id_solicitud')
@@ -408,7 +421,7 @@ def enviar_cotizacion(request):
             'rut_cliente': rut_cliente,
             'correo_cliente': cliente.correo,
             'id_solicitud': id_solicitud,
-            'comentario': '',
+            'comentario':comentario,
             'largo_maximo_caja': datos_procesar.get('largo_hm_str', ''),
             'alto_max_caja': datos_procesar.get('ancho_hm_str', ''),
             'area_caja': datos_procesar.get('api_area_caja', ''),
@@ -422,7 +435,7 @@ def enviar_cotizacion(request):
             'porcentaje_utilidad': datos_calculo_precio.get('porcentaje', ''),
             'fecha_solicitud': fecha_cotizacion,
         }
-
+        
         # URL y headers para la petición a la API
         url = 'http://localhost:8000/crear_correo/'
         token = '95f397a7bce2f2ffbe6c404caa1994ae991c4ee5'  # Asegúrate de usar tu token real aquí
@@ -501,13 +514,16 @@ VISTAS DE COTIZACIÓN MANUAL
 #     else:
 #         # Manejar otros métodos o devolver un error
 #         pass
+@login_required
 def cotizacion_manual (request):
         return render(request, 'cotizacion_manual.html')
 
+@login_required
 def calculo_de_precio(request):
 
     return render(request, 'calculo_de_precio.html')
 
+@login_required
 def creacion_cliente(request):
     return render(request, 'creacion_cliente.html')
 
@@ -515,6 +531,7 @@ from django.shortcuts import render, redirect
 from .models import Cliente  # Importa el modelo Cliente
 from django.core.exceptions import ValidationError
 
+@login_required
 def agregar_cliente(request):
     mensaje_error = None
     mensaje_exito = None
@@ -548,6 +565,7 @@ def agregar_cliente(request):
 PROCESAR DATOS FORMULARIO MANUAL
 -----------------------------------------------------------------------------
 """
+@login_required
 def procesar_datos(request):
     mensaje_error = None #inicializador
     if request.method == 'POST':
@@ -561,6 +579,7 @@ def procesar_datos(request):
         altostr = request.POST.get('alto')
         cantidad = int(request.POST.get('cantidad_cajas'))
         tipo_carton = request.POST.get('tipo_carton').upper()
+        comentarios = request.POST.get('comentarios')
 
          # Verificar si el cliente ya existe
         try:
@@ -743,6 +762,7 @@ def procesar_datos(request):
         Sessions para argumentos de API
         """
         datos_procesar = {
+            'comentarios':comentarios,
             'rut_cliente': rut_cliente,
             'api_fecha_solicitud': api_fecha_solicitud,
             'largo': largo,

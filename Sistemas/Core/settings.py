@@ -82,6 +82,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+    },
+    'api_db': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': r'API_auto\db.sqlite3'
     }
 }
 
