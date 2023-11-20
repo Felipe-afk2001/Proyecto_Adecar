@@ -88,13 +88,13 @@ def calcular_manual(request):
             coste_materia_prima = (cantidad_plancha * precio_plancha)
             coste_materia_prima = math.ceil(coste_materia_prima)  
 
-                #calculo de precio de caja unitaria
-            precio_caja = (coste_creacion) 
-            precio_caja = math.ceil(precio_caja)  
-
                 #calculo de precio de total de cajas
-            precio_total = (precio_caja * cantidad_caja) + coste_materia_prima
+            precio_total = (coste_creacion * cantidad_caja) + coste_materia_prima 
             precio_total = math.ceil(precio_total)
+
+                #calculo de precio de caja unitaria
+            precio_caja = (precio_total/cantidad_caja) 
+            precio_caja = math.ceil(precio_caja)  
 
                 #calculo fecha de vencimiento
             fecha_actual = timezone.now()
@@ -129,7 +129,8 @@ def calcular_manual(request):
                 'precio_caja' : precio_caja,
                 'precio_total' : precio_total,
                 'comentario' : comentario,
-                'fecha_vencimiento' : fecha_vencimiento
+                'fecha_vencimiento' : fecha_vencimiento,
+                'cantidad_x_plancha' : caja_x_planchas
             }, status=status.HTTP_200_OK)
             
         else:
@@ -431,6 +432,7 @@ def crear_correo(request):
 
                     **Pasos Siguientes:**
                     1. Si estás de acuerdo con la cotización, por favor, confírmanos tu aceptación.
+                        Puedes hacer esto a travez de nuestra pagina http://127.0.0.1:8001/compra/{id_solicitud}
                     2. Para proceder con el pedido, te proporcionaremos detalles sobre el proceso de pago y cualquier información adicional necesaria.
                     3. Si tienes alguna pregunta o necesitas más aclaraciones, no dudes en ponerte en contacto con nosotros.
 
@@ -532,13 +534,13 @@ def calcular_auto(request):
             coste_materia_prima = (cantidad_plancha * precio_plancha)
             coste_materia_prima = math.ceil(coste_materia_prima)  
 
-                #calculo de precio de caja unitaria
-            precio_caja = (coste_creacion) * porcentaje_utilidad
-            precio_caja = math.ceil(precio_caja)  
-
                 #calculo de precio de total de cajas
-            precio_total = (precio_caja * cantidad_caja) + coste_materia_prima
+            precio_total = (coste_creacion * cantidad_caja) + coste_materia_prima 
             precio_total = math.ceil(precio_total)
+
+                #calculo de precio de caja unitaria
+            precio_caja = (precio_total/cantidad_caja) 
+            precio_caja = math.ceil(precio_caja)  
 
                 #calculo fecha de vencimiento
             fecha_actual = timezone.now()
@@ -699,6 +701,7 @@ def calcular_auto(request):
 
                     **Pasos Siguientes:**
                     1. Si estás de acuerdo con la cotización, por favor, confírmanos tu aceptación.
+                        Puedes hacer esto a travez de nuestra pagina http://127.0.0.1:8001/compra/{id_solicitud}
                     2. Para proceder con el pedido, te proporcionaremos detalles sobre el proceso de pago y cualquier información adicional necesaria.
                     3. Si tienes alguna pregunta o necesitas más aclaraciones, no dudes en ponerte en contacto con nosotros.
 

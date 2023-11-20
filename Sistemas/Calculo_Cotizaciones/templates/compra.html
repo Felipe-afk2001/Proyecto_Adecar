@@ -1,0 +1,54 @@
+{% extends 'layouts/base_nav_lateral.html' %}
+{% load static %}
+
+{% block nav_lateral %}
+{% endblock %}
+
+{% block section %}
+
+<div class="container mt-1">
+    <h2>Detalle de Solicitud de Cotización</h2>
+    <br>
+    <dl class="row">
+        <h4 class="alert-heading">¡Gracias por su solicitud de cotización!</h4>
+        <p>Valoramos mucho su interés en nuestros productos y servicios.</p>
+
+        <dt class="col-sm-3">ID de Cotización:</dt>
+        <dd class="col-sm-9">{{ solicitud.id_cotizacion }}</dd>
+
+        <dt class="col-sm-3">Fecha de la solicitud:</dt>
+        <dd class="col-sm-9">{{ solicitud.fecha_cotizacion }}</dd>
+
+        <dt class="col-sm-3">Cliente:</dt>
+        <dd class="col-sm-9">{{ solicitud.nombre_cliente }} {{ solicitud.apellido_cliente }}</dd>
+
+        <dt class="col-sm-3">Correo del Cliente:</dt>
+        <dd class="col-sm-9">{{ solicitud.correo_cliente }}</dd>
+
+        <dt class="col-sm-3">Largo solicitado:</dt>
+        <dd class="col-sm-9">{{ solicitud.largo }}</dd>
+
+        <dt class="col-sm-3">Ancho solicitado:</dt>
+        <dd class="col-sm-9">{{ solicitud.ancho }}</dd>
+
+        <dt class="col-sm-3">Alto solicitado:</dt>
+        <dd class="col-sm-9">{{ solicitud.alto }}</dd>
+
+        <dt class="col-sm-3">Cantidad de cajas solicitadas:</dt>
+        <dd class="col-sm-9">{{ solicitud.cantidad_caja }}</dd>
+
+        <dt class="col-sm-3">Precio final:</dt>
+        <dd class="col-sm-9">{{ solicitud.monto_total }}</dd>
+        <br>
+        <hr>
+        <p class="mb-0">Si está satisfecho con la cotización y desea proceder con la compra, por favor haga clic en el botón "Aprobar Solicitud" a continuación. Esto nos permitirá continuar con el proceso de su pedido de manera eficiente.</p>
+
+        <form action="{% url 'compra' solicitud.id_cotizacion %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">Aceptar Solicitud</button>
+        </form>
+
+        <!-- Agrega más campos según necesites -->
+    </dl>
+
+{% endblock %}
