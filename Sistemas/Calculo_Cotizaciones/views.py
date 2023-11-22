@@ -53,7 +53,6 @@ def registrar(request):
         form = UserCreationForm()
     return render(request, 'registrar.html', {'form': form})
 
-#cambiar el estado
 def estados(request, id_solicitud):
     solicitud = get_object_or_404(Solicitud_Cotizacion, id_cotizacion=id_solicitud) 
     if request.method == 'POST':
@@ -75,6 +74,7 @@ def dashboards(request):
 """
 Historial de cotizaciones
 """
+@login_required
 def lista_historial(request):
     historial_list = Solicitud_Cotizacion.objects.all()
     paginator = Paginator(historial_list, 10) # Muestra 20 registros por página
@@ -86,6 +86,7 @@ def lista_historial(request):
 """
 Descargar historial en excel
 """
+@login_required
 def descargar_excel_historial(request):
     # Crear un DataFrame con los datos del historial
     data = Solicitud_Cotizacion.objects.all().values()
@@ -113,10 +114,12 @@ def descargar_excel_historial(request):
 """
 Mantención de planchas
 """
+@login_required
 def lista_planchas(request):
     planchas = Tipo_Plancha.objects.all()
     return render(request, 'mantencion_planchas_form.html', {'planchas': planchas})
 
+@login_required
 def editar_plancha(request, id):
     plancha = get_object_or_404(Tipo_Plancha, pk=id)
     if request.method == 'POST':
@@ -128,11 +131,13 @@ def editar_plancha(request, id):
         form = PlanchaForm(instance=plancha)
     return render(request, 'editar_planchas.html', {'form': form, 'plancha': plancha})
 
+@login_required
 def eliminar_plancha(request, id):
     plancha = get_object_or_404(Tipo_Plancha, pk=id)
     plancha.delete()
     return redirect('lista_planchas')
 
+@login_required
 def crear_plancha(request):
     if request.method == 'POST':
         form = PlanchaForm(request.POST)
@@ -143,7 +148,7 @@ def crear_plancha(request):
         form = PlanchaForm()  
     return render(request, 'crear_planchas.html', {'form': form})
 
-
+@login_required
 def mantencion_planchas_form(request):
     plancha_id = request.GET.get('id_tipo_plancha')
     plancha = None
@@ -172,11 +177,12 @@ def mantencion_planchas_form(request):
 Mantención de parámetros
 -----------------------------------------------------------------------------
 """
-
+@login_required
 def lista_parametros(request):
     parametros = Parametro.objects.all()
     return render(request, 'mantencion_parametros_form.html', {'parametros': parametros})
 
+@login_required
 def editar_parametro(request, id):
     parametro = get_object_or_404(Parametro, pk=id)
     if request.method == 'POST':
@@ -188,11 +194,13 @@ def editar_parametro(request, id):
         form = ParametroForm(instance=parametro)
     return render(request, 'editar_parametros.html', {'form': form, 'parametro': parametro})
 
+@login_required
 def eliminar_parametro(request, id):
     parametro = get_object_or_404(Parametro, pk=id)
     parametro.delete()
     return redirect('lista_parametros')
 
+@login_required
 def crear_parametro(request):
     if request.method == 'POST':
         form = ParametroForm(request.POST)
@@ -203,6 +211,7 @@ def crear_parametro(request):
         form = ParametroForm()  # Un formulario vacío para un nuevo registro
     return render(request, 'crear_parametros.html', {'form': form})
 
+@login_required
 def mantencion_parametros_form(request):
     parametro_id = request.GET.get('id_parametro')
     parametro = None
@@ -265,15 +274,26 @@ def enviar_solicitud_api(largo, ancho, alto, largo_plancha, ancho_plancha, coste
 """
 API PDF Manual
 """
-
+@login_required
 def solicitud_pdf(request, id_solicitud):
     try:
         # Obtener datos desde la sesión
         datos_procesar = request.session.get('datos_procesar', {})
         datos_calculo = request.session.get('datos_calculo_precio', {})
-        area_calculada = round(datos_procesar.get('largo_hm') * datos_procesar.get('ancho_hm'), 0)
+
+        # Validar y calcular los valores necesarios
+        try:
+            precio_final = int(round(float(datos_calculo.get('precio_final'))))
+            cantidad = int(datos_procesar.get('cantidad'))
+            area_calculada = round(float(datos_procesar.get('largo_hm', 0)) * float(datos_procesar.get('ancho_hm', 0)), 2)
+            precio_total = (precio_final * cantidad)
+        except (ValueError, TypeError):
+            print("Error en la conversión de los valores.")
+            return None
+
         # Asegurarse de obtener el cliente y su correo
         rut_cliente = datos_procesar.get('rut_cliente', '')
+        comentario = datos_procesar.get('comentarios', '')
         try:
             cliente = Cliente.objects.get(rut_cliente=rut_cliente)
             correo_cliente = cliente.correo
@@ -284,7 +304,7 @@ def solicitud_pdf(request, id_solicitud):
         # Datos que se enviarán en la petición a la API
         datos_pdf = {
             'porcentaje_utilidad': datos_calculo.get('porcentaje'),
-            'precio_total': int(round(float(datos_calculo.get('precio_final')))),
+            'precio_caja': int(round(float(datos_calculo.get('precio_final')))),
             'cantidad_planchas':int(datos_procesar.get('api_cantidad_plancha')),
             'largo_maximo_caja':datos_procesar.get('largo_hm_str'),
             'alto_maximo_caja':datos_procesar.get('ancho_hm_str'),
@@ -292,7 +312,7 @@ def solicitud_pdf(request, id_solicitud):
             'ancho_caja':int(datos_procesar.get('ancho')),
             'alto_caja':int(datos_procesar.get('alto')),
             'area_caja':area_calculada,
-            'comentario':'', #Agregar si es posible.
+            'comentario':comentario,
             'nombre_cliente': nombre_completo,
             'rut_cliente': rut_cliente,
             'correo_cliente': correo_cliente,
@@ -304,7 +324,7 @@ def solicitud_pdf(request, id_solicitud):
             'area_total_plancha': datos_procesar.get('api_area_total_plancha', ''),
             'coste_creacion': 50,
             'coste_materia_prima': datos_procesar.get('api_precio_plancha', ''),
-            'precio_caja': int(round(datos_procesar.get('costo_por_unidad', ''))),
+            'precio_total': precio_total,
             'fecha_solicitud': datos_procesar.get('api_fecha_solicitud', ''),
         }
 
@@ -330,10 +350,10 @@ def solicitud_pdf(request, id_solicitud):
 """
 Generar cotización (Guarda en db)
 """
-
+@login_required
 def generar_cotizacion(request):
     if request.method == 'POST':
-        datos_procesar = request.session.get('datos_procesar', {})
+        
         porcentaje = request.POST.get('porcentaje')
         precio_final = request.POST.get('precio_final')
 
@@ -341,6 +361,15 @@ def generar_cotizacion(request):
             'porcentaje': porcentaje,
             'precio_final': precio_final,
         }
+
+        datos_procesar = request.session.get('datos_procesar', {})
+        
+
+        
+        cantidad = int(datos_procesar.get('cantidad'))
+        precio_total = int(float(precio_final) * cantidad)
+
+        
 
         request.session['datos_calculo_precio'] = datos_calculo_precio    
 
@@ -369,7 +398,7 @@ def generar_cotizacion(request):
             cod_carton=datos_procesar.get('tipo_carton'),
             comentario=datos_procesar.get('comentario', ''),
             estado='Pendiente',
-            monto_total=precio_final
+            monto_total=precio_total
         )
         nueva_solicitud.save()
 
@@ -395,16 +424,22 @@ def generar_cotizacion(request):
 """
 Enviar cotizacion (Envia correo PDF API a Cliente)
 """
+@login_required
 def enviar_cotizacion(request):
     # Asegurarse de que solo se procese como una solicitud POST
     if request.method != 'POST':
         return redirect('cotizacion_manual')
 
     try:
+        datos_calculo = request.session.get('datos_calculo_precio', {})
         # Obtener datos desde la sesión
         datos_procesar = request.session.get('datos_procesar', {})
         datos_calculo_precio = request.session.get('datos_calculo_precio', {})
         rut_cliente = datos_procesar.get('rut_cliente', '')
+        comentario = datos_procesar.get('comentarios', '')
+        precio_final = int(round(float(datos_calculo.get('precio_final'))))
+        cantidad = int(datos_procesar.get('cantidad'))
+        precio_total = (precio_final * cantidad)
 
         cliente = Cliente.objects.get(rut_cliente=rut_cliente)
         id_solicitud = request.session.get('id_solicitud')
@@ -421,7 +456,7 @@ def enviar_cotizacion(request):
             'rut_cliente': rut_cliente,
             'correo_cliente': cliente.correo,
             'id_solicitud': id_solicitud,
-            'comentario': '',
+            'comentario':comentario,
             'largo_maximo_caja': datos_procesar.get('largo_hm_str', ''),
             'alto_maximo_caja': datos_procesar.get('ancho_hm_str', ''),
             'area_caja': datos_procesar.get('api_area_caja', ''),
@@ -430,12 +465,13 @@ def enviar_cotizacion(request):
             'area_total_plancha': datos_procesar.get('api_area_total_plancha', ''),
             'coste_creacion': 50,
             'coste_materia_prima': datos_procesar.get('api_precio_plancha', ''),
-            'precio_caja': datos_procesar.get('costo_por_unidad', ''),
-            'precio_total': int(round(float(datos_calculo_precio.get('precio_final')))),
+            'precio_caja': int(round(float(datos_calculo.get('precio_final')))),
+            'precio_total': precio_total,
             'porcentaje_utilidad': datos_calculo_precio.get('porcentaje', ''),
             'fecha_solicitud': fecha_cotizacion,
+            'fecha_vencimiento': datos_procesar.get('api_fecha_vencimiento','')
         }
-
+        
         # URL y headers para la petición a la API
         url = 'http://localhost:8000/crear_correo/'
         token = '95f397a7bce2f2ffbe6c404caa1994ae991c4ee5'  # Asegúrate de usar tu token real aquí
@@ -504,23 +540,16 @@ def calcular_cajas_por_plancha(largo_hm, media_hm, ancho_hm, tipo_carton):
 VISTAS DE COTIZACIÓN MANUAL
 -----------------------------------------------------------------------------
 """
-
-# def visualiza_pdf(request):
-#     if request.method == 'POST':
-#         porcentaje = request.POST.get('porcentaje')
-#         # Procesa otros datos del formulario según sea necesario
-#         # ...
-#         return render(request, 'visualiza_pdf', {'porcentaje': porcentaje})
-#     else:
-#         # Manejar otros métodos o devolver un error
-#         pass
+@login_required
 def cotizacion_manual (request):
         return render(request, 'cotizacion_manual.html')
 
+@login_required
 def calculo_de_precio(request):
 
     return render(request, 'calculo_de_precio.html')
 
+@login_required
 def creacion_cliente(request):
     return render(request, 'creacion_cliente.html')
 
@@ -528,6 +557,7 @@ from django.shortcuts import render, redirect
 from .models import Cliente  # Importa el modelo Cliente
 from django.core.exceptions import ValidationError
 
+@login_required
 def agregar_cliente(request):
     mensaje_error = None
     mensaje_exito = None
@@ -561,6 +591,7 @@ def agregar_cliente(request):
 PROCESAR DATOS FORMULARIO MANUAL
 -----------------------------------------------------------------------------
 """
+@login_required
 def procesar_datos(request):
     mensaje_error = None #inicializador
     if request.method == 'POST':
@@ -574,6 +605,7 @@ def procesar_datos(request):
         altostr = request.POST.get('alto')
         cantidad = int(request.POST.get('cantidad_cajas'))
         tipo_carton = request.POST.get('tipo_carton').upper()
+        comentarios = request.POST.get('comentarios')
 
          # Verificar si el cliente ya existe
         try:
@@ -757,6 +789,7 @@ def procesar_datos(request):
         Sessions para argumentos de API
         """
         datos_procesar = {
+            'comentarios':comentarios,
             'rut_cliente': rut_cliente,
             'api_fecha_solicitud': api_fecha_solicitud,
             'largo': largo,
@@ -775,7 +808,6 @@ def procesar_datos(request):
             'ancho_hm_str': api_ancho_maximo_caja,
             'media_hm_str': media_hm_str,
             'plancha_necesaria': plancha_seleccionada,
-            'api_area_total_plancha': api_area_total_plancha,
             'excedente_vertical': excedente_vertical,
             'excedente_horizontal': excedente_horizontal,
             'total_cajas_por_plancha': total_cajas_por_plancha,
@@ -787,7 +819,8 @@ def procesar_datos(request):
             'api_area_caja': api_area_caja,
             'api_area_total_plancha': api_area_total_plancha,
             'api_cantidad_plancha': api_cantidad_plancha,
-            'api_cantidad_x_plancha': api_cantidad_x_plancha
+            'api_cantidad_x_plancha': api_cantidad_x_plancha,
+            'api_fecha_vencimiento': api_fecha_vencimiento,
         }
 
         request.session['datos_procesar'] = datos_procesar
@@ -811,7 +844,6 @@ def procesar_datos(request):
                                                           'ancho_hm_str':api_ancho_maximo_caja, #API
                                                           'media_hm_str':media_hm_str,
                                                           'plancha_necesaria':plancha_seleccionada,
-                                                          'api_area_total_plancha':api_area_total_plancha, #API
                                                           'excedente_vertical':excedente_vertical, #API VER
                                                           'excedente_horizontal':excedente_horizontal, #API VER
                                                           'total_cajas_por_plancha': total_cajas_por_plancha, #APISALE MAL
@@ -822,5 +854,6 @@ def procesar_datos(request):
                                                           'apellido_cliente':apellido_cliente,
                                                           'api_area_caja':api_area_caja, #API
                                                           'api_area_total_plancha':api_area_total_plancha,
+                                                          'api_cantidad_plancha': api_cantidad_plancha,
                                                           'api_cantidad_x_plancha': api_cantidad_x_plancha
                                                           })  

@@ -3,6 +3,10 @@ from django.utils import timezone
 import string
 import itertools
 from django.db.models.signals import post_save
+<<<<<<< HEAD
+=======
+from django.dispatch import receiver
+>>>>>>> main
 
 class Tipo_Plancha(models.Model):
     id_tipo_plancha = models.CharField(max_length=100, primary_key=True)
@@ -67,7 +71,8 @@ class Solicitud_Cotizacion(models.Model):
             num = int(largest_id.id_cotizacion.lstrip(prefix)) + 1
         else:
             num = 1
-        return f'{prefix}{num}'
+        # Asegúrate de que el número siempre tenga al menos dos dígitos
+        return f'{prefix}{num:02}'
 
     class Meta:
         db_table = 'Solicitud_Cotizacion'
