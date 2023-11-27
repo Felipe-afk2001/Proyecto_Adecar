@@ -3,10 +3,7 @@ from django.utils import timezone
 import string
 import itertools
 from django.db.models.signals import post_save
-<<<<<<< HEAD
-=======
 from django.dispatch import receiver
->>>>>>> main
 
 class Tipo_Plancha(models.Model):
     id_tipo_plancha = models.CharField(max_length=100, primary_key=True)

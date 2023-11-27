@@ -11,8 +11,9 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 import io
+
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
@@ -149,6 +150,14 @@ def crear_pdf_manual(request):
 
 
             # Generar variables
+                #variables medidas
+            largo1 = (data.get('largo_caja', 0)+3)
+            largo2 = (data.get('ancho_caja', 0)+5)
+            largo3 = (data.get('largo_caja', 0)+5)
+            largo4 = (data.get('ancho_caja', 0)+3)
+            alto1 = (data.get('alto_caja', 0)+5)
+            alto2 = ((data.get('ancho_caja', 0)/2)+3)
+
                 #variables cliente
             nombre_cliente = data.get('nombre_cliente', 0)
             rut_cliente = data.get('rut_cliente', 0)
@@ -160,7 +169,7 @@ def crear_pdf_manual(request):
 
                 #variables caja
             largo_maximo_caja = data.get('largo_maximo_caja')
-            alto_max_caja = data.get('alto_maximo_caja')
+            alto_maximo_caja = data.get('alto_maximo_caja')
             area_caja = data.get('area_caja')
             cantidad_caja = data.get('cantidad_cajas', 0)
 
@@ -179,18 +188,144 @@ def crear_pdf_manual(request):
                 #variables fecha 
             fecha_actual = data.get('fecha_solicitud')
             
+                # Funcion para hacer lineas punteadas
+            def dibujar_linea_punteada(dibujo, inicio, fin, dash=(5, 3), fill='white'):
+                    x1, y1 = inicio
+                    x2, y2 = fin
+                    dx = x2 - x1
+                    dy = y2 - y1
+                    distancia = math.sqrt(dx*dx + dy*dy)
+                    dash_longitud, espacio_longitud = dash
+
+                    if dx == 0:  # Línea vertical
+                        num_dashes = abs(y2 - y1) // (dash_longitud + espacio_longitud)
+                        for i in range(int(num_dashes)):
+                            y_inicio = y1 + i * (dash_longitud + espacio_longitud)
+                            y_fin = y_inicio + dash_longitud
+                            dibujo.line([(x1, y_inicio), (x1, min(y_fin, y2))], fill=fill)
+                    else:  # Línea no vertical
+                        num_dashes = distancia // (dash_longitud + espacio_longitud)
+                        for i in range(int(num_dashes)):
+                            x_inicio = x1 + i * (dash_longitud + espacio_longitud) * dx / distancia
+                            y_inicio = y1 + i * (dash_longitud + espacio_longitud) * dy / distancia
+                            x_fin = x_inicio + dash_longitud * dx / distancia
+                            y_fin = y_inicio + dash_longitud * dy / distancia
+                            dibujo.line([(x_inicio, y_inicio), (x_fin, y_fin)], fill=fill)           
+            
+            def crear_diseno_caja(dimensiones, nombre_archivo):
+            # Crea una nueva imagen con fondo blanco con orientación horizontal
+
+                imagen = Image.new('RGB', (dimensiones['ancho_imagen'], dimensiones['alto_imagen']), 'white')
+                dibujo = ImageDraw.Draw(imagen)
+
+                # Coordenadas iniciales
+                x_inicial, y_inicial = 50, 50  # Puede que necesites ajustar esto
+
+                # Dibuja las líneas externas de la caja
+                dibujo.rectangle([x_inicial, y_inicial, x_inicial + dimensiones['ancho_total'], y_inicial + dimensiones['alto_total']], outline='black')
+
+                # Variables de líneas horizontales
+                l1 = y_inicial + dimensiones['largo1']
+                l2 = l1 + dimensiones['largo2']
+                l3 = l2 + dimensiones['largo3']
+                l4 = l3 + dimensiones['largo4']
+                
+                # Variables de líneas verticales
+                a1 = x_inicial + dimensiones['alto1']
+                a2 = a1 + dimensiones['alto2']
+                
+                # Dibuja las líneas verticales internas
+                for l in [l1, l2, l3, l4]:
+                    dibujo.line([(l, y_inicial), (l, y_inicial + dimensiones['alto_total'])], fill='black')
+                
+                # Dibuja las líneas horizontales internas
+                for a in [a1, a2]:
+                    dibujo.line([(x_inicial, a), (x_inicial + dimensiones['ancho_total'], a)], fill='black')
+
+
+                # Uso de la función
+                dibujar_linea_punteada(dibujo, (l1, y_inicial), (l1, y_inicial + dimensiones['alto1']), dash=(2, 5), fill='white')
+                dibujar_linea_punteada(dibujo, (l2, y_inicial), (l2, y_inicial + dimensiones['alto1']), dash=(2, 5), fill='white')
+                dibujar_linea_punteada(dibujo, (l3, y_inicial), (l3, y_inicial + dimensiones['alto1']), dash=(2, 5), fill='white')
+                dibujar_linea_punteada(dibujo, (l1, y_inicial + dimensiones['alto1'] + dimensiones['alto2']), (l1, y_inicial + dimensiones['alto1'] + dimensiones['alto2'] + dimensiones['alto1']), dash=(2, 5), fill='white')
+                dibujar_linea_punteada(dibujo, (l2, y_inicial + dimensiones['alto1'] + dimensiones['alto2']), (l2, y_inicial + dimensiones['alto1'] + dimensiones['alto2'] + dimensiones['alto1']), dash=(2, 5), fill='white')
+                dibujar_linea_punteada(dibujo, (l3, y_inicial + dimensiones['alto1'] + dimensiones['alto2']), (l3, y_inicial + dimensiones['alto1'] + dimensiones['alto2'] + dimensiones['alto1']), dash=(2, 5), fill='white')
+                
+
+                    # Especifica la fuente y el tamaño
+                try:
+                    fuente = ImageFont.truetype("arial.ttf", 20)  # Cambia 20 al tamaño que desees
+                except IOError:
+                    fuente = ImageFont.load_default()
+
+                # Variables texto
+                vt1 = (dimensiones['largo1'] + (x_inicial + dimensiones['largo2'])/2) - 20
+                vt2 = (dimensiones['largo1'] + dimensiones['largo2'] + (x_inicial + dimensiones['largo3'])/2) - 20
+                vt3 = (dimensiones['largo1'] + dimensiones['largo2'] + dimensiones['largo3'] + (x_inicial + dimensiones['largo4'])/2) - 20
+                vt4 = (dimensiones['alto1'] + (y_inicial + dimensiones['alto2']/2))
+                vt5 = (dimensiones['alto1'] + dimensiones['alto2'] + (y_inicial + dimensiones['alto1']/2))
+
+                textos = [
+                    # (x, y, texto)
+                    (((x_inicial+dimensiones['largo1'])/2)-20, (y_inicial + dimensiones['alto1']/2),f"{int(dimensiones['largo1'])}x{int(dimensiones['alto1'])}"),
+                    (vt1, (y_inicial + dimensiones['alto1']/2),f"{int(dimensiones['largo2'])}x{int(dimensiones['alto1'])}"),
+                    (vt2, (y_inicial + dimensiones['alto1']/2),f"{int(dimensiones['largo3'])}x{int(dimensiones['alto1'])}"),
+                    (vt3, (y_inicial + dimensiones['alto1']/2),f"{int(dimensiones['largo4'])}x{int(dimensiones['alto1'])}"),
+                    (((x_inicial+dimensiones['largo1'])/2)-20, vt4,f"{int(dimensiones['alto2'])}x{int(dimensiones['alto1'])}"),
+                    (vt1, vt4,f"{int(dimensiones['largo2'])}x{int(dimensiones['alto2'])}"),
+                    (vt2, vt4,f"{int(dimensiones['largo3'])}x{int(dimensiones['alto2'])}"),
+                    (vt3, vt4,f"{int(dimensiones['largo4'])}x{int(dimensiones['alto2'])}"),
+                    (((x_inicial+dimensiones['largo1'])/2)-20, vt5,f"{int(dimensiones['largo1'])}x{int(dimensiones['alto1'])}"),
+                    (vt1, vt5,f"{int(dimensiones['largo2'])}x{int(dimensiones['alto1'])}"),
+                    (vt2, vt5,f"{int(dimensiones['largo3'])}x{int(dimensiones['alto1'])}"),
+                    (vt3, vt5,f"{int(dimensiones['largo4'])}x{int(dimensiones['alto1'])}"),
+                ]
+                
+                for x, y, texto in textos:
+                    dibujo.text((x, y), texto, fill='black', font=fuente)
+                
+                # Guarda la imagen
+                imagen.save(nombre_archivo)
+                
+                # Recorte de la imagen si es necesario
+                largo_final = x_inicial + dimensiones['ancho_total'] + 50
+                alto_final = y_inicial + dimensiones['alto_total'] + 50
+
+                if largo_final < dimensiones['ancho_imagen'] or alto_final < dimensiones['alto_imagen']:
+                    recorte = (0, 0, largo_final, alto_final)
+                    imagen = imagen.crop(recorte)
+
+                # Guarda la imagen
+                imagen.save(nombre_archivo)
+
+            dimensiones_caja = {
+                    'ancho_total': largo_maximo_caja,  # La suma de los anchos
+                    'alto_total': alto_maximo_caja,  # La suma de los altos
+                    'largo1': largo1,
+                    'largo2': largo2,
+                    'largo3': largo3,
+                    'largo4': largo4,
+                    'alto1': alto2,
+                    'alto2': alto1,
+                    'ancho_imagen': 2500,
+                    'alto_imagen': 1800
+                }
+            
+            dibujo = 'diseno_caja.png'
+            crear_diseno_caja(dimensiones_caja, dibujo)
 
             # Generar PDF
+            pagesize=letter
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="cotizacion_{id_solicitud}.pdf"'
-            p = canvas.Canvas(response, pagesize=letter)
+            p = canvas.Canvas(response, pagesize=pagesize)
 
             # Configuraciones de estilo
             p.setFont("Helvetica-Bold", 25)
             p.drawString(50, 750, "Adecar")  # Logo o nombre de la empresa
             p.setFont("Helvetica", 16)
             p.drawString(50, 730, f'Cotización N° {id_solicitud}')
-            p.drawString(200, 730, f'Santiago de Chile, {fecha_actual}')
+            p.drawString(320, 730, f'Santiago de Chile, {fecha_actual}')
             
             # Datos del cliente
             altura_cliente = 700  # Iniciar la altura para los detalles del cliente
@@ -227,7 +362,7 @@ def crear_pdf_manual(request):
             p.setFont("Helvetica", 12)
             p.drawString(50, altura_detalle, f'Largo total de la caja: {largo_maximo_caja} mm')
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f'Alto total de la caja: {alto_max_caja} mm')
+            p.drawString(50, altura_detalle, f'Alto total de la caja: {alto_maximo_caja} mm')
             altura_detalle -= 15
             p.drawString(50, altura_detalle, f'Area total de la caja: {area_caja} mm²')
             altura_detalle -= 30
@@ -272,6 +407,50 @@ def crear_pdf_manual(request):
             p.setStrokeColor(colors.black)
             p.line(50, altura_detalle - 10, 550, altura_detalle - 10)
 
+            # Añadir una nueva página al PDF
+            p.showPage()
+
+            # Calcular el tamaño de la imagen para escalar
+            imagen = Image.open(dibujo)
+            ancho_imagen, alto_imagen = imagen.size
+            if ancho_imagen > 1500 or alto_imagen > 850:
+                escala = min((pagesize[0] - 200) / ancho_imagen, (pagesize[1] - 200) / alto_imagen)
+            else:
+                escala = min((pagesize[0] - 100) / ancho_imagen, (pagesize[1] - 100) / alto_imagen)
+            ancho_escalado = ancho_imagen * escala
+            alto_escalado = alto_imagen * escala
+
+            # Variable de posicion eje y
+            altura_imagen2 =pagesize[1] - 80
+
+            # Texto de como cortar la imagen
+            p.setFont("Helvetica-Bold", 16)
+            p.drawString(50, altura_imagen2, 'Instrucciones para Armar la Caja')
+            altura_imagen2 -=20
+            p.drawString(50, altura_imagen2, 'Pasos a Seguir:')
+            altura_imagen2 -=20
+            p.setFont("Helvetica", 12)
+            p.drawString(50, altura_imagen2, 'Recorta: Corta a lo largo de los bordes externos sólidos del dibujo.')
+            altura_imagen2 -=20
+            p.drawString(50, altura_imagen2, 'Corta las lineas punteadas del dibujo hasta que llegues a las lineas enteras.')
+            altura_imagen2 -=20
+            p.drawString(50, altura_imagen2, 'Dobla: Haz un pliegue a lo largo de todas las líneas interiores sólidas.')
+            altura_imagen2 -=20
+            p.drawString(50, altura_imagen2, 'Pega: Aplica pegamento en el rectangulo mas pequeño y únelo con el lado de')
+            altura_imagen2 -=15
+            p.drawString(50, altura_imagen2, 'la caja del otro extremo para formar la caja.')
+            altura_imagen2 -=20
+            p.drawString(50, altura_imagen2, 'Arma: Comienza por el fondo de la caja y finaliza con la tapa.')
+            altura_imagen2 -=20
+            p.drawString(50, altura_imagen2, '¡Tu caja está lista!')
+            altura_imagen2 -=30
+
+           # Hacer lineas punteadas en pdf
+            p.setDash([5, 3])
+            p.line(25, altura_imagen2, 580, altura_imagen2)
+
+            # Insertar la imagen escalada en la nueva página
+            p.drawImage(dibujo, 50, (altura_imagen2 - alto_escalado - 50), width=ancho_escalado, height=alto_escalado)
 
             # Cierra el objeto PDF y devuelve la respuesta
             p.showPage()
@@ -293,6 +472,14 @@ def crear_correo(request):
             data = request.data
 
             # Generar variables
+            #variables medidas
+            largo1 = (data.get('largo_caja', 0)+3)
+            largo2 = (data.get('ancho_caja', 0)+5)
+            largo3 = (data.get('largo_caja', 0)+5)
+            largo4 = (data.get('ancho_caja', 0)+3)
+            alto1 = (data.get('alto_caja', 0)+5)
+            alto2 = ((data.get('ancho_caja', 0)/2)+3)
+
                 #variables cliente
             nombre_cliente = data.get('nombre_cliente', 0)
             rut_cliente = data.get('rut_cliente', 0)
@@ -304,7 +491,7 @@ def crear_correo(request):
 
                 #variables caja
             largo_maximo_caja = data.get('largo_maximo_caja')
-            alto_max_caja = data.get('alto_maximo_caja')
+            alto_maximo_caja = data.get('alto_maximo_caja')
             area_caja = data.get('area_caja')
             cantidad_caja = data.get('cantidad_cajas', 0)
 
@@ -324,17 +511,143 @@ def crear_correo(request):
             fecha_actual = data.get('fecha_solicitud')
             fecha_vencimiento = data.get('fecha_vencimiento')
 
+            def dibujar_linea_punteada(dibujo, inicio, fin, dash=(5, 3), fill='white'):
+                    x1, y1 = inicio
+                    x2, y2 = fin
+                    dx = x2 - x1
+                    dy = y2 - y1
+                    distancia = math.sqrt(dx*dx + dy*dy)
+                    dash_longitud, espacio_longitud = dash
+
+                    if dx == 0:  # Línea vertical
+                        num_dashes = abs(y2 - y1) // (dash_longitud + espacio_longitud)
+                        for i in range(int(num_dashes)):
+                            y_inicio = y1 + i * (dash_longitud + espacio_longitud)
+                            y_fin = y_inicio + dash_longitud
+                            dibujo.line([(x1, y_inicio), (x1, min(y_fin, y2))], fill=fill)
+                    else:  # Línea no vertical
+                        num_dashes = distancia // (dash_longitud + espacio_longitud)
+                        for i in range(int(num_dashes)):
+                            x_inicio = x1 + i * (dash_longitud + espacio_longitud) * dx / distancia
+                            y_inicio = y1 + i * (dash_longitud + espacio_longitud) * dy / distancia
+                            x_fin = x_inicio + dash_longitud * dx / distancia
+                            y_fin = y_inicio + dash_longitud * dy / distancia
+                            dibujo.line([(x_inicio, y_inicio), (x_fin, y_fin)], fill=fill)           
+            
+            def crear_diseno_caja(dimensiones, nombre_archivo):
+            # Crea una nueva imagen con fondo blanco con orientación horizontal
+
+                imagen = Image.new('RGB', (dimensiones['ancho_imagen'], dimensiones['alto_imagen']), 'white')
+                dibujo = ImageDraw.Draw(imagen)
+
+                # Coordenadas iniciales
+                x_inicial, y_inicial = 50, 50  # Puede que necesites ajustar esto
+
+                # Dibuja las líneas externas de la caja
+                dibujo.rectangle([x_inicial, y_inicial, x_inicial + dimensiones['ancho_total'], y_inicial + dimensiones['alto_total']], outline='black')
+
+                # Variables de líneas horizontales
+                l1 = y_inicial + dimensiones['largo1']
+                l2 = l1 + dimensiones['largo2']
+                l3 = l2 + dimensiones['largo3']
+                l4 = l3 + dimensiones['largo4']
+                
+                # Variables de líneas verticales
+                a1 = x_inicial + dimensiones['alto1']
+                a2 = a1 + dimensiones['alto2']
+                
+                # Dibuja las líneas verticales internas
+                for l in [l1, l2, l3, l4]:
+                    dibujo.line([(l, y_inicial), (l, y_inicial + dimensiones['alto_total'])], fill='black')
+                
+                # Dibuja las líneas horizontales internas
+                for a in [a1, a2]:
+                    dibujo.line([(x_inicial, a), (x_inicial + dimensiones['ancho_total'], a)], fill='black')
+
+
+                # Uso de la función
+                dibujar_linea_punteada(dibujo, (l1, y_inicial), (l1, y_inicial + dimensiones['alto1']), dash=(2, 5), fill='white')
+                dibujar_linea_punteada(dibujo, (l2, y_inicial), (l2, y_inicial + dimensiones['alto1']), dash=(2, 5), fill='white')
+                dibujar_linea_punteada(dibujo, (l3, y_inicial), (l3, y_inicial + dimensiones['alto1']), dash=(2, 5), fill='white')
+                dibujar_linea_punteada(dibujo, (l1, y_inicial + dimensiones['alto1'] + dimensiones['alto2']), (l1, y_inicial + dimensiones['alto1'] + dimensiones['alto2'] + dimensiones['alto1']), dash=(2, 5), fill='white')
+                dibujar_linea_punteada(dibujo, (l2, y_inicial + dimensiones['alto1'] + dimensiones['alto2']), (l2, y_inicial + dimensiones['alto1'] + dimensiones['alto2'] + dimensiones['alto1']), dash=(2, 5), fill='white')
+                dibujar_linea_punteada(dibujo, (l3, y_inicial + dimensiones['alto1'] + dimensiones['alto2']), (l3, y_inicial + dimensiones['alto1'] + dimensiones['alto2'] + dimensiones['alto1']), dash=(2, 5), fill='white')
+                
+
+                    # Especifica la fuente y el tamaño
+                try:
+                    fuente = ImageFont.truetype("arial.ttf", 20)  # Cambia 20 al tamaño que desees
+                except IOError:
+                    fuente = ImageFont.load_default()
+
+                # Variables texto
+                vt1 = (dimensiones['largo1'] + (x_inicial + dimensiones['largo2'])/2) - 20
+                vt2 = (dimensiones['largo1'] + dimensiones['largo2'] + (x_inicial + dimensiones['largo3'])/2) - 20
+                vt3 = (dimensiones['largo1'] + dimensiones['largo2'] + dimensiones['largo3'] + (x_inicial + dimensiones['largo4'])/2) - 20
+                vt4 = (dimensiones['alto1'] + (y_inicial + dimensiones['alto2']/2))
+                vt5 = (dimensiones['alto1'] + dimensiones['alto2'] + (y_inicial + dimensiones['alto1']/2))
+
+                textos = [
+                    # (x, y, texto)
+                    (((x_inicial+dimensiones['largo1'])/2)-20, (y_inicial + dimensiones['alto1']/2),f"{int(dimensiones['largo1'])}x{int(dimensiones['alto1'])}"),
+                    (vt1, (y_inicial + dimensiones['alto1']/2),f"{int(dimensiones['largo2'])}x{int(dimensiones['alto1'])}"),
+                    (vt2, (y_inicial + dimensiones['alto1']/2),f"{int(dimensiones['largo3'])}x{int(dimensiones['alto1'])}"),
+                    (vt3, (y_inicial + dimensiones['alto1']/2),f"{int(dimensiones['largo4'])}x{int(dimensiones['alto1'])}"),
+                    (((x_inicial+dimensiones['largo1'])/2)-20, vt4,f"{int(dimensiones['alto2'])}x{int(dimensiones['alto1'])}"),
+                    (vt1, vt4,f"{int(dimensiones['largo2'])}x{int(dimensiones['alto2'])}"),
+                    (vt2, vt4,f"{int(dimensiones['largo3'])}x{int(dimensiones['alto2'])}"),
+                    (vt3, vt4,f"{int(dimensiones['largo4'])}x{int(dimensiones['alto2'])}"),
+                    (((x_inicial+dimensiones['largo1'])/2)-20, vt5,f"{int(dimensiones['largo1'])}x{int(dimensiones['alto1'])}"),
+                    (vt1, vt5,f"{int(dimensiones['largo2'])}x{int(dimensiones['alto1'])}"),
+                    (vt2, vt5,f"{int(dimensiones['largo3'])}x{int(dimensiones['alto1'])}"),
+                    (vt3, vt5,f"{int(dimensiones['largo4'])}x{int(dimensiones['alto1'])}"),
+                ]
+                
+                for x, y, texto in textos:
+                    dibujo.text((x, y), texto, fill='black', font=fuente)
+                
+                # Guarda la imagen
+                imagen.save(nombre_archivo)
+                
+                # Recorte de la imagen si es necesario
+                largo_final = x_inicial + dimensiones['ancho_total'] + 50
+                alto_final = y_inicial + dimensiones['alto_total'] + 50
+
+                if largo_final < dimensiones['ancho_imagen'] or alto_final < dimensiones['alto_imagen']:
+                    recorte = (0, 0, largo_final, alto_final)
+                    imagen = imagen.crop(recorte)
+
+                # Guarda la imagen
+                imagen.save(nombre_archivo)
+
+            dimensiones_caja = {
+                    'ancho_total': largo_maximo_caja,  # La suma de los anchos
+                    'alto_total': alto_maximo_caja,  # La suma de los altos
+                    'largo1': largo1,
+                    'largo2': largo2,
+                    'largo3': largo3,
+                    'largo4': largo4,
+                    'alto1': alto2,
+                    'alto2': alto1,
+                    'ancho_imagen': 2500,
+                    'alto_imagen': 1800
+                }
+            
+            dibujo = 'diseno_caja.png'
+            crear_diseno_caja(dimensiones_caja, dibujo)
+
             # Generar PDF
+            pagesize=letter
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="cotizacion_{id_solicitud}.pdf"'
-            p = canvas.Canvas(response, pagesize=letter)
+            p = canvas.Canvas(response, pagesize=pagesize)
 
             # Configuraciones de estilo
             p.setFont("Helvetica-Bold", 25)
             p.drawString(50, 750, "Adecar")  # Logo o nombre de la empresa
             p.setFont("Helvetica", 16)
             p.drawString(50, 730, f'Cotización N° {id_solicitud}')
-            p.drawString(200, 730, f'Santiago de Chile, {fecha_actual}')
+            p.drawString(320, 730, f'Santiago de Chile, {fecha_actual}')
             
             # Datos del cliente
             altura_cliente = 700  # Iniciar la altura para los detalles del cliente
@@ -371,7 +684,7 @@ def crear_correo(request):
             p.setFont("Helvetica", 12)
             p.drawString(50, altura_detalle, f'Largo total de la caja: {largo_maximo_caja} mm')
             altura_detalle -= 15
-            p.drawString(50, altura_detalle, f'Alto total de la caja: {alto_max_caja} mm')
+            p.drawString(50, altura_detalle, f'Alto total de la caja: {alto_maximo_caja} mm')
             altura_detalle -= 15
             p.drawString(50, altura_detalle, f'Area total de la caja: {area_caja} mm²')
             altura_detalle -= 30
@@ -416,6 +729,50 @@ def crear_correo(request):
             p.setStrokeColor(colors.black)
             p.line(50, altura_detalle - 10, 550, altura_detalle - 10)
 
+            # Añadir una nueva página al PDF
+            p.showPage()
+
+            # Calcular el tamaño de la imagen para escalar
+            imagen = Image.open(dibujo)
+            ancho_imagen, alto_imagen = imagen.size
+            if ancho_imagen > 1500 or alto_imagen > 850:
+                escala = min((pagesize[0] - 200) / ancho_imagen, (pagesize[1] - 200) / alto_imagen)
+            else:
+                escala = min((pagesize[0] - 100) / ancho_imagen, (pagesize[1] - 100) / alto_imagen)
+            ancho_escalado = ancho_imagen * escala
+            alto_escalado = alto_imagen * escala
+
+            # Variable de posicion eje y
+            altura_imagen2 =pagesize[1] - 80
+
+            # Texto de como cortar la imagen
+            p.setFont("Helvetica-Bold", 16)
+            p.drawString(50, altura_imagen2, 'Instrucciones para Armar la Caja')
+            altura_imagen2 -=20
+            p.drawString(50, altura_imagen2, 'Pasos a Seguir:')
+            altura_imagen2 -=20
+            p.setFont("Helvetica", 12)
+            p.drawString(50, altura_imagen2, 'Recorta: Corta a lo largo de los bordes externos sólidos del dibujo.')
+            altura_imagen2 -=20
+            p.drawString(50, altura_imagen2, 'Corta las lineas punteadas del dibujo hasta que llegues a las lineas enteras.')
+            altura_imagen2 -=20
+            p.drawString(50, altura_imagen2, 'Dobla: Haz un pliegue a lo largo de todas las líneas interiores sólidas.')
+            altura_imagen2 -=20
+            p.drawString(50, altura_imagen2, 'Pega: Aplica pegamento en el rectangulo mas pequeño y únelo con el lado de')
+            altura_imagen2 -=15
+            p.drawString(50, altura_imagen2, 'la caja del otro extremo para formar la caja.')
+            altura_imagen2 -=20
+            p.drawString(50, altura_imagen2, 'Arma: Comienza por el fondo de la caja y finaliza con la tapa.')
+            altura_imagen2 -=20
+            p.drawString(50, altura_imagen2, '¡Tu caja está lista!')
+            altura_imagen2 -=30
+
+           # Hacer lineas punteadas en pdf
+            p.setDash([5, 3])
+            p.line(25, altura_imagen2, 580, altura_imagen2)
+
+            # Insertar la imagen escalada en la nueva página
+            p.drawImage(dibujo, 50, (altura_imagen2 - alto_escalado - 50), width=ancho_escalado, height=alto_escalado)
 
             # Cierra el objeto PDF y devuelve la respuesta
             p.showPage()
@@ -548,45 +905,39 @@ def calcular_auto(request):
             fecha_vencimiento = fecha_vencimiento.strftime('%d-%m-%Y')
             fecha_actual = fecha_actual.strftime('%d-%m-%Y')
 
-            # # Generar imagen de la caja
-            # imagen = Image.new('RGB', (1800, 2500), 'white')  # Cambiado para una orientación vertical
+
+            # Crea una nueva imagen con fondo blanco
+            # imagen = Image.new('RGB', (dimensiones['ancho_imagen'], dimensiones['alto_imagen']), 'white')
             # dibujo = ImageDraw.Draw(imagen)
 
-            # dimensiones = {
-            #     'ancho_total': largo1 + largo2 + largo3 + largo4 + 40,  # La suma de los anchos
-            #     'alto_total': alto2 + alto1 + alto2,  # La suma de los altos
-            #     'ancho_central': largo2,  # El ancho de la parte central de la caja
-            #     'alto_central': alto1,   # El alto de la parte central de la caja
-            #     'ancho_aleta': largo4,    # El ancho de las aletas laterales de la caja
-            #     'alto_aleta': alto2      # El alto de las aletas superiores e inferiores de la caja
-            # }
-
             # # Coordenadas iniciales
-            # x_inicial, y_inicial = 50, 50  # Puedes cambiar esto según necesites
+            # x_inicial, y_inicial = 50, 50
 
             # # Dibuja las líneas externas de la caja
-            # dibujo.rectangle([x_inicial, y_inicial, x_inicial + dimensiones['ancho_total'], y_inicial + dimensiones['alto_total']], outline='black')
+            # dibujo.rectangle([x_inicial, y_inicial, x_inicial + dimensiones['alto_total'], y_inicial + dimensiones['ancho_total']], outline='black')
 
             # # Dibuja las líneas internas horizontales
-            # y_actual = y_inicial + dimensiones['alto_aleta']
-            # for _ in range(2):  # Dibuja las dos líneas horizontales
-            #     dibujo.line([(x_inicial, y_actual), (x_inicial + dimensiones['ancho_total'], y_actual)], fill='black')
+            # y_actual = y_inicial + dimensiones['ancho_aleta']
+            # for _ in range(4):  # Dibuja las tres líneas horizontales
+            #     dibujo.line([(x_inicial, y_actual), (x_inicial + dimensiones['alto_total'], y_actual)], fill='black')
             #     y_actual += dimensiones['alto_central']
 
             # # Dibuja las líneas internas verticales
-            # x_actual = x_inicial + dimensiones['ancho_aleta']
-            # for _ in range(4):  # Dibuja las dos líneas verticales
-            #     dibujo.line([(x_actual, y_inicial), (x_actual, y_inicial + dimensiones['alto_total'])], fill='black')
+            # x_actual = x_inicial + dimensiones['alto_aleta']
+            # for _ in range(2):  # Dibuja las dos líneas verticales
+            #     dibujo.line([(x_actual, y_inicial), (x_actual, y_inicial + dimensiones['ancho_total'])], fill='black')
             #     x_actual += dimensiones['ancho_central']
-            
-            # # Ajusta las dimensiones de la imagen al tamaño de la página del PDF
-            # ancho_pagina, alto_pagina = letter  # Tamaño de página estándar
-            # escala = min(ancho_pagina / dimensiones['ancho_total'], alto_pagina / dimensiones['alto_total'])  # Escala para ajustar la imagen
 
-            # # Generar la imagen en memoria
-            # output = io.BytesIO()
-            # imagen.save(output, format='PNG')
-            # output.seek(0)  # Regresar al comienzo del archivo en memoria
+            # # Recorte de la imagen si es necesario
+            # largo_final = x_inicial + dimensiones['alto_total'] + 50
+            # alto_final = y_inicial + dimensiones['ancho_total'] + 50
+
+            # if largo_final < dimensiones['ancho_imagen'] or alto_final < dimensiones['alto_imagen']:
+            #     recorte = (0, 0, largo_final, alto_final)
+            #     imagen = imagen.crop(recorte)
+
+            # # Guarda la imagen
+            # imagen.save(nombre_archivo)
 
             # Generar PDF
             response = HttpResponse(content_type='application/pdf')
